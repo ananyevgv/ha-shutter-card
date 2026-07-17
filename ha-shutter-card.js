@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v2.9.1-fixed — Dual mode + оверлей + детализированная шторка + фикс drag для single mode
+// v2.9.1-fixed — Dual mode + оверлей + детализированная шторка + фикс процентов + фикс drag
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
@@ -72,8 +72,6 @@ const SHUTTER_DEFAULT_CONFIG = {
   // Dual mode
   left_entity_id: '',
   right_entity_id: '',
-  left_name: 'Левая',
-  right_name: 'Правая',
   left_color_blind: 'rgba(26, 26, 46, 0.85)',
   right_color_blind: 'rgba(26, 26, 46, 0.85)',
   
@@ -828,7 +826,7 @@ class ShutterCard extends HTMLElement {
       try { greetText = t.greet ? t.greet() : ''; } catch (_) { greetText = ''; }
     }
 
-    // Статус в шапке
+    // Статус в шапке (управляется show_status)
     let headerStatusHtml = '';
     if (!isDual && showStatusBar) {
       headerStatusHtml = `
@@ -837,12 +835,12 @@ class ShutterCard extends HTMLElement {
           ${singleStatus.text}
         </div>
       `;
-    } else if (isDual) {
+    } else if (isDual && showStatusBar) {
       headerStatusHtml = `
         <div style="display:flex;gap:12px;font-size:10px;color:${theme.text_muted};flex-wrap:wrap;justify-content:flex-end;">
-          <span style="color:${leftStatus.color}">${cfg.left_name || 'Левая'}: ${leftStatus.text}</span>
+          <span style="color:${leftStatus.color}">Левая: ${leftStatus.text}</span>
           <span style="color:${theme.text_muted};">|</span>
-          <span style="color:${rightStatus.color}">${cfg.right_name || 'Правая'}: ${rightStatus.text}</span>
+          <span style="color:${rightStatus.color}">Правая: ${rightStatus.text}</span>
         </div>
       `;
     }
@@ -863,10 +861,10 @@ class ShutterCard extends HTMLElement {
         statusBarHtml = `
           <div class="status-bar">
             <div class="status-dual">
-              <span>${cfg.left_name || 'Левая'}:</span>
+              <span>Левая:</span>
               <span class="state" style="color:${leftStatus.color}">${Math.round(this._leftPos)}%</span>
               <span style="color:${theme.text_muted};">|</span>
-              <span>${cfg.right_name || 'Правая'}:</span>
+              <span>Правая:</span>
               <span class="state" style="color:${rightStatus.color}">${Math.round(this._rightPos)}%</span>
             </div>
           </div>
@@ -952,24 +950,38 @@ class ShutterCard extends HTMLElement {
           rightChanged = true;
         }
         
-        // Обновляем статус в шапке для dual
-        if (leftChanged || rightChanged) {
+        // Обновляем статус в шапке для dual (только если show_status включен)
+        if ((leftChanged || rightChanged) && cfg.show_status !== false) {
           const headerDual = this.shadowRoot?.querySelector('.header-right > div:last-child');
           if (headerDual && isDual) {
             const leftState = this._state(cfg.left_entity_id);
             const rightState = this._state(cfg.right_entity_id);
             const leftStatus = this._getStatusText(this._leftPos, leftState);
             const rightStatus = this._getStatusText(this._rightPos, rightState);
-            const leftName = cfg.left_name || 'Левая';
-            const rightName = cfg.right_name || 'Правая';
             headerDual.innerHTML = `
-              <span style="color:${leftStatus.color}">${leftName}: ${leftStatus.text}</span>
+              <span style="color:${leftStatus.color}">Левая: ${leftStatus.text}</span>
               <span style="color:${theme.text_muted};">|</span>
-              <span style="color:${rightStatus.color}">${rightName}: ${rightStatus.text}</span>
+              <span style="color:${rightStatus.color}">Правая: ${rightStatus.text}</span>
             `;
           }
           
-          // Обновляем статус-бар с позицией для dual
+          // Обновляем статус-бар с позицией для dual (всегда обновляем позицию, даже если show_status выключен)
+          const statusDual = this.shadowRoot?.querySelector('.status-dual');
+          if (statusDual && isDual) {
+            const leftState = this._state(cfg.left_entity_id);
+            const rightState = this._state(cfg.right_entity_id);
+            const leftStatus = this._getStatusText(this._leftPos, leftState);
+            const rightStatus = this._getStatusText(this._rightPos, rightState);
+            const spans = statusDual.querySelectorAll('.state');
+            if (spans.length >= 2) {
+              spans[0].textContent = `${Math.round(this._leftPos)}%`;
+              spans[0].style.color = leftStatus.color;
+              spans[1].textContent = `${Math.round(this._rightPos)}%`;
+              spans[1].style.color = rightStatus.color;
+            }
+          }
+        } else {
+          // Если show_status выключен, обновляем только позицию
           const statusDual = this.shadowRoot?.querySelector('.status-dual');
           if (statusDual && isDual) {
             const leftState = this._state(cfg.left_entity_id);
@@ -991,15 +1003,17 @@ class ShutterCard extends HTMLElement {
           this._leftPos = newPos;
           this._updateOverlay('single', newPos, cfg.color_blind);
           
-          // Обновляем статус в шапке для single
-          const headerStatus = this.shadowRoot?.querySelector('.header-status');
-          if (headerStatus) {
-            const state = this._state(cfg.entity_id);
-            const status = this._getStatusText(newPos, state);
-            const dot = headerStatus.querySelector('.dot');
-            const text = headerStatus.childNodes[headerStatus.childNodes.length - 1];
-            if (dot) dot.className = `dot ${status.dot}`;
-            if (text) text.textContent = status.text;
+          // Обновляем статус в шапке для single (если включен)
+          if (cfg.show_status !== false) {
+            const headerStatus = this.shadowRoot?.querySelector('.header-status');
+            if (headerStatus) {
+              const state = this._state(cfg.entity_id);
+              const status = this._getStatusText(newPos, state);
+              const dot = headerStatus.querySelector('.dot');
+              const text = headerStatus.childNodes[headerStatus.childNodes.length - 1];
+              if (dot) dot.className = `dot ${status.dot}`;
+              if (text) text.textContent = status.text;
+            }
           }
           
           // Обновляем позицию в статус-баре для single
@@ -1124,14 +1138,16 @@ class ShutterCard extends HTMLElement {
               this._leftPos = newPos;
               this._updateOverlay('single', newPos, cfg.color_blind);
               // Обновляем статус в шапке
-              const headerStatus = this.shadowRoot?.querySelector('.header-status');
-              if (headerStatus) {
-                const state = this._state(cfg.entity_id);
-                const status = this._getStatusText(newPos, state);
-                const dot = headerStatus.querySelector('.dot');
-                const text = headerStatus.childNodes[headerStatus.childNodes.length - 1];
-                if (dot) dot.className = `dot ${status.dot}`;
-                if (text) text.textContent = status.text;
+              if (cfg.show_status !== false) {
+                const headerStatus = this.shadowRoot?.querySelector('.header-status');
+                if (headerStatus) {
+                  const state = this._state(cfg.entity_id);
+                  const status = this._getStatusText(newPos, state);
+                  const dot = headerStatus.querySelector('.dot');
+                  const text = headerStatus.childNodes[headerStatus.childNodes.length - 1];
+                  if (dot) dot.className = `dot ${status.dot}`;
+                  if (text) text.textContent = status.text;
+                }
               }
               // Обновляем позицию в статус-баре
               const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
@@ -1180,8 +1196,6 @@ class ShutterCard extends HTMLElement {
     document.addEventListener('touchend', this._onDragEnd.bind(this));
   }
 }
-
-
 
 // ─── EDITOR ──────────────────────────────────────────────────────────────
 class ShutterCardEditor extends HTMLElement {
@@ -1580,10 +1594,6 @@ class ShutterCardEditor extends HTMLElement {
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
                 <div>
                   ${this._entityField('left_entity_id', 'Сущность (левая)', 'cover')}
-                  <div class="row" style="margin-top:6px;">
-                    <label>Название (левая)</label>
-                    <input class="txt-inp" type="text" id="inp-left-name" value="${cfg.left_name || ''}" placeholder="Левая"/>
-                  </div>
                   <div class="row">
                     <label>Цвет шторки (левая)</label>
                     <div class="color-blind-row">
@@ -1604,10 +1614,6 @@ class ShutterCardEditor extends HTMLElement {
                 </div>
                 <div>
                   ${this._entityField('right_entity_id', 'Сущность (правая)', 'cover')}
-                  <div class="row" style="margin-top:6px;">
-                    <label>Название (правая)</label>
-                    <input class="txt-inp" type="text" id="inp-right-name" value="${cfg.right_name || ''}" placeholder="Правая"/>
-                  </div>
                   <div class="row">
                     <label>Цвет шторки (правая)</label>
                     <div class="color-blind-row">
@@ -1852,8 +1858,6 @@ class ShutterCardEditor extends HTMLElement {
     wireText('inp-title', 'title');
     wireText('inp-subtitle', 'subtitle');
     wireText('inp-owner', 'owner_name');
-    wireText('inp-left-name', 'left_name');
-    wireText('inp-right-name', 'right_name');
 
     // RGBA color pickers
     const bindColorPicker = (pickerId, textId, alphaId, alphaLabelId, configKey) => {
