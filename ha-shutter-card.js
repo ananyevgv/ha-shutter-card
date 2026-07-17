@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.0.0-fixed — Dual mode + оверлей + детализированная шторка + фикс процентов + фикс drag
+// v2.9.1-fixed — Dual mode + оверлей + детализированная шторка + фикс процентов + фикс drag
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
@@ -2092,7 +2092,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.0.0 %c Dual mode + детализированная шторка + RGBA!',
+  '%c 🪟 Shutter Card %c v2.9.1 %c Dual mode + детализированная шторка + RGBA!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
