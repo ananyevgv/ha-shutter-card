@@ -86,8 +86,11 @@
 3. Перейдите в **Настройки → Панели → Ресурсы** → **Добавить ресурс**:
 
 ### Основано на
+
 https://github.com/doanlong1412/gate-card
+
 https://github.com/samoswall/pic-shutter-card
+
 https://github.com/dermotduffy/advanced-camera-card
 
 ---
