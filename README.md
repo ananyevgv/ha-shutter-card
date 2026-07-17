@@ -30,7 +30,7 @@
 ### Способ 2 — Ручная установка
 
 1. Скачайте [`ha-shutter-card.js`](https://github.com/ananyevgv/ha-shutter-card/releases/latest)
-2. Скопируйте в `/config/www/ha-shutter-card.js`
+2. Скопируйте в `/config/www/ha-shutter-card.js` и папку i18n
 3. Перейдите в **Настройки → Панели → Ресурсы** → **Добавить ресурс**:
 
 ---
