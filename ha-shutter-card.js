@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v2.9.1-fixed — Dual mode + оверлей + детализированная шторка + фикс процентов + фикс drag
+// v1.0.0-fixed — Dual mode + оверлей + детализированная шторка + фикс процентов + фикс drag
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
