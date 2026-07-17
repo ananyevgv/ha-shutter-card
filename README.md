@@ -13,7 +13,7 @@
 
 ## 📸 Превью
 
-![Превью HA Shutter Card](preview.png)
+![Превью HA Shutter Card](preview.png) ![Превью HA Shutter Card](preview1.png)
 
 ---
 
