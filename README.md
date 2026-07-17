@@ -37,7 +37,7 @@
 
 ## 📸 Превью
 
-![Превью HA Shutter Card](assets/preview.png)
+![Превью HA Shutter Card](image/shutter-cam-dual.jpg)
 
 ---
 
