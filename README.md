@@ -43,7 +43,7 @@
 
 ## 🎛️ Визуальный редактор
 
-![Редактор HA Shutter Card](assets/editor-preview.png)
+![Редактор HA Shutter Card](image/editor.jpg)
 
 ---
 
