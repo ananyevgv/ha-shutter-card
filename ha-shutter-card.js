@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.0.0-fixed — Dual mode + оверлей + детализированная шторка + фикс процентов + фикс drag
+// v1.0.0 — Dual mode + оверлей + детализированная шторка + фикс процентов + фикс drag + фикс single mode update
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
@@ -791,7 +791,7 @@ class ShutterCard extends HTMLElement {
     }
 
     // Single mode controls (все 4 варианта)
-    let controlsTopHtml = '', controlsBottomHtml = '', controlsLeftHtml = '', controlsRightHtml = '';
+    let controlsTopHtml = '', controlsBottomHtml = '', controlsLeftHtmlSingle = '', controlsRightHtmlSingle = '';
     const controlsPos = cfg.controls_position || 'bottom';
 
     const controlsHtmlSingle = cfg.show_controls !== false && !isDual ? `
@@ -814,8 +814,8 @@ class ShutterCard extends HTMLElement {
     if (!isDual) {
       if (controlsPos === 'top') controlsTopHtml = controlsHtmlSingle;
       else if (controlsPos === 'bottom') controlsBottomHtml = controlsHtmlSingle;
-      else if (controlsPos === 'left') controlsLeftHtml = controlsHtmlSingle;
-      else if (controlsPos === 'right') controlsRightHtml = controlsHtmlSingle;
+      else if (controlsPos === 'left') controlsLeftHtmlSingle = controlsHtmlSingle;
+      else if (controlsPos === 'right') controlsRightHtmlSingle = controlsHtmlSingle;
     }
 
     const dualClasses = isDual ? 'shutter-controls-dual' : '';
@@ -891,9 +891,9 @@ class ShutterCard extends HTMLElement {
             ${controlsTopHtml}
 
             <div class="shutter-row">
-              ${controlsLeftHtml || leftControlsHtml}
+              ${controlsLeftHtmlSingle || leftControlsHtml}
               ${cameraHtml}
-              ${controlsRightHtml || rightControlsHtml}
+              ${controlsRightHtmlSingle || rightControlsHtml}
             </div>
 
             ${controlsBottomHtml}
@@ -937,21 +937,34 @@ class ShutterCard extends HTMLElement {
       if (isDual) {
         const newLeftPos = this._getPosition(cfg.left_entity_id);
         const newRightPos = this._getPosition(cfg.right_entity_id);
-        let leftChanged = false, rightChanged = false;
         
         if (newLeftPos !== this._leftPos) {
           this._leftPos = newLeftPos;
           this._updateOverlay('left', newLeftPos, cfg.left_color_blind);
-          leftChanged = true;
         }
         if (newRightPos !== this._rightPos) {
           this._rightPos = newRightPos;
           this._updateOverlay('right', newRightPos, cfg.right_color_blind);
-          rightChanged = true;
         }
         
-        // Обновляем статус в шапке для dual (только если show_status включен)
-        if ((leftChanged || rightChanged) && cfg.show_status !== false) {
+        // Обновляем статус-бар для dual
+        const statusDual = this.shadowRoot?.querySelector('.status-dual');
+        if (statusDual && isDual) {
+          const leftState = this._state(cfg.left_entity_id);
+          const rightState = this._state(cfg.right_entity_id);
+          const leftStatus = this._getStatusText(this._leftPos, leftState);
+          const rightStatus = this._getStatusText(this._rightPos, rightState);
+          const spans = statusDual.querySelectorAll('.state');
+          if (spans.length >= 2) {
+            spans[0].textContent = `${Math.round(this._leftPos)}%`;
+            spans[0].style.color = leftStatus.color;
+            spans[1].textContent = `${Math.round(this._rightPos)}%`;
+            spans[1].style.color = rightStatus.color;
+          }
+        }
+        
+        // Обновляем статус в шапке для dual
+        if (cfg.show_status !== false) {
           const headerDual = this.shadowRoot?.querySelector('.header-right > div:last-child');
           if (headerDual && isDual) {
             const leftState = this._state(cfg.left_entity_id);
@@ -964,66 +977,52 @@ class ShutterCard extends HTMLElement {
               <span style="color:${rightStatus.color}">Правая: ${rightStatus.text}</span>
             `;
           }
-          
-          // Обновляем статус-бар с позицией для dual (всегда обновляем позицию, даже если show_status выключен)
-          const statusDual = this.shadowRoot?.querySelector('.status-dual');
-          if (statusDual && isDual) {
-            const leftState = this._state(cfg.left_entity_id);
-            const rightState = this._state(cfg.right_entity_id);
-            const leftStatus = this._getStatusText(this._leftPos, leftState);
-            const rightStatus = this._getStatusText(this._rightPos, rightState);
-            const spans = statusDual.querySelectorAll('.state');
-            if (spans.length >= 2) {
-              spans[0].textContent = `${Math.round(this._leftPos)}%`;
-              spans[0].style.color = leftStatus.color;
-              spans[1].textContent = `${Math.round(this._rightPos)}%`;
-              spans[1].style.color = rightStatus.color;
-            }
-          }
-        } else {
-          // Если show_status выключен, обновляем только позицию
-          const statusDual = this.shadowRoot?.querySelector('.status-dual');
-          if (statusDual && isDual) {
-            const leftState = this._state(cfg.left_entity_id);
-            const rightState = this._state(cfg.right_entity_id);
-            const leftStatus = this._getStatusText(this._leftPos, leftState);
-            const rightStatus = this._getStatusText(this._rightPos, rightState);
-            const spans = statusDual.querySelectorAll('.state');
-            if (spans.length >= 2) {
-              spans[0].textContent = `${Math.round(this._leftPos)}%`;
-              spans[0].style.color = leftStatus.color;
-              spans[1].textContent = `${Math.round(this._rightPos)}%`;
-              spans[1].style.color = rightStatus.color;
-            }
-          }
         }
       } else {
+        // SINGLE MODE - обновляем всегда, как в dual режиме
         const newPos = this._getPosition(cfg.entity_id);
+        const state = this._state(cfg.entity_id);
+        
+        // Обновляем позицию, если изменилась
         if (newPos !== this._leftPos) {
           this._leftPos = newPos;
           this._updateOverlay('single', newPos, cfg.color_blind);
-          
-          // Обновляем статус в шапке для single (если включен)
-          if (cfg.show_status !== false) {
-            const headerStatus = this.shadowRoot?.querySelector('.header-status');
-            if (headerStatus) {
-              const state = this._state(cfg.entity_id);
-              const status = this._getStatusText(newPos, state);
-              const dot = headerStatus.querySelector('.dot');
-              const text = headerStatus.childNodes[headerStatus.childNodes.length - 1];
-              if (dot) dot.className = `dot ${status.dot}`;
-              if (text) text.textContent = status.text;
+        }
+        
+        // Всегда получаем актуальный статус
+        const status = this._getStatusText(this._leftPos, state);
+        
+        // Всегда обновляем статус в шапке (как в dual режиме)
+        if (cfg.show_status !== false) {
+          const headerStatus = this.shadowRoot?.querySelector('.header-status');
+          if (headerStatus) {
+            const dot = headerStatus.querySelector('.dot');
+            // Находим текстовый узел
+            let textNode = null;
+            for (let node of headerStatus.childNodes) {
+              if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                textNode = node;
+                break;
+              }
+            }
+            if (!textNode) {
+              // Если текстового узла нет, используем последний child
+              textNode = headerStatus.lastChild;
+            }
+            if (dot) {
+              dot.className = `dot ${status.dot}`;
+            }
+            if (textNode) {
+              textNode.textContent = status.text;
             }
           }
-          
-          // Обновляем позицию в статус-баре для single
-          const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
-          if (statusLeft) {
-            const state = this._state(cfg.entity_id);
-            const status = this._getStatusText(newPos, state);
-            statusLeft.textContent = `${Math.round(newPos)}%`;
-            statusLeft.style.color = status.color;
-          }
+        }
+        
+        // Всегда обновляем позицию в статус-баре (как в dual режиме)
+        const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
+        if (statusLeft) {
+          statusLeft.textContent = `${Math.round(this._leftPos)}%`;
+          statusLeft.style.color = status.color;
         }
       }
     }
@@ -1144,9 +1143,16 @@ class ShutterCard extends HTMLElement {
                   const state = this._state(cfg.entity_id);
                   const status = this._getStatusText(newPos, state);
                   const dot = headerStatus.querySelector('.dot');
-                  const text = headerStatus.childNodes[headerStatus.childNodes.length - 1];
+                  let textNode = null;
+                  for (let node of headerStatus.childNodes) {
+                    if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                      textNode = node;
+                      break;
+                    }
+                  }
+                  if (!textNode) textNode = headerStatus.lastChild;
                   if (dot) dot.className = `dot ${status.dot}`;
-                  if (text) text.textContent = status.text;
+                  if (textNode) textNode.textContent = status.text;
                 }
               }
               // Обновляем позицию в статус-баре
@@ -1490,7 +1496,7 @@ class ShutterCardEditor extends HTMLElement {
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">v2.9.1 — Dual mode (кнопки слева/справа)</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.0.0 — Dual mode (кнопки слева/справа)</span>
         </div>
 
         <!-- Language -->
@@ -2092,7 +2098,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.0.0 %c Dual mode + детализированная шторка + RGBA!',
+  '%c 🪟 Shutter Card %c v1.0.0 %c Dual mode + детализированная шторка + RGBA + фикс single mode!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
