@@ -14,19 +14,19 @@
 ## 📸 Превью
 
 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-  <img src="image/preview.png" style="width: 450px; height: 280px; object-fit: cover; border-radius: 8px;" />
-  <img src="image/preview2.png" style="width: 450px; height: 280px; object-fit: cover; border-radius: 8px;" />
+  <img src="images/preview.png" style="width: 450px; height: 280px; object-fit: cover; border-radius: 8px;" />
+  <img src="images/preview2.png" style="width: 450px; height: 280px; object-fit: cover; border-radius: 8px;" />
 </div>
 
 ---
 
-![Превью HA Shutter Card](image/shutter-cam-dual.jpg)
+![Превью HA Shutter Card](images/shutter-cam-dual.jpg)
 
 ---
 
 ## 🎛️ Визуальный редактор
 
-![Редактор HA Shutter Card](image/editor.jpg)
+![Редактор HA Shutter Card](images/editor.jpg)
 
 
 
