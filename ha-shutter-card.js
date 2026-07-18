@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.1.0 — Шкала прогресса + Режим без датчика положения
+// v1.1.0 — Шкала прогресса + Режим без датчика положения + Мобильная адаптация + Эмуляция без ОС
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
@@ -75,10 +75,10 @@ const SHUTTER_DEFAULT_CONFIG = {
   left_color_blind: 'rgba(26, 26, 46, 0.85)',
   right_color_blind: 'rgba(26, 26, 46, 0.85)',
   
-  // === НОВОЕ: Режим без датчика положения ===
-  no_feedback: false,           // Включить режим без обратной связи
-  memory_type: 'localstorage',  // 'localstorage' или 'input_number'
-  input_number_entity: '',      // Сущность input_number для хранения позиции
+  // Режим без датчика положения
+  no_feedback: false,
+  memory_type: 'localstorage',
+  input_number_entity: '',
   left_input_number: '',
   right_input_number: '',
   
@@ -118,9 +118,8 @@ const SHUTTER_DEFAULT_CONFIG = {
   motion_entity: '',
   recording_entity: '',
   
-  // === НОВОЕ: Шкала прогресса ===
-  show_progress_bar: true,      // Показывать шкалу прогресса
-  progress_bar_style: 'gradient', // 'gradient' или 'solid'
+  show_progress_bar: true,
+  progress_bar_style: 'gradient',
 };
 
 // ─── CSS ──────────────────────────────────────────────────────────────────
@@ -244,7 +243,6 @@ function getShutterCSS(haTheme) {
   font-size:8px;font-weight:700;color:${theme.text_primary};opacity:0.8;text-shadow:0 1px 4px rgba(0,0,0,0.5);
   pointer-events:none;display:none}
 .progress-bar:hover .progress-label{display:block}
-
 @keyframes progressPulse{0%,100%{opacity:1}50%{opacity:0.6}}
 
 /* ─── Controls ── */
@@ -319,19 +317,72 @@ function getShutterCSS(haTheme) {
 .status-left .state{font-weight:600;color:${theme.text_secondary}}
 .status-dual{display:flex;align-items:center;gap:12px;font-size:10px;color:${theme.text_muted}}
 
-/* ─── No feedback indicator ── */
+/* ─── No feedback badge ── */
 .no-feedback-badge{display:inline-flex;align-items:center;gap:4px;
   font-size:9px;color:${theme.text_muted};padding:2px 8px;
   border-radius:10px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'};
   border:1px solid ${theme.border}}
 
-@media(max-width:500px){.inner{padding:14px}.header-title{font-size:18px}
-  .shutter-controls-left .shutter-row,.shutter-controls-right .shutter-row{flex-direction:column}
-  .controls-left,.controls-right{flex-direction:row;width:100%}
-  .controls-left .control-btn,.controls-right .control-btn{max-width:80px;padding:10px 6px;flex:1}
-  .controls-left .control-btn .ico,.controls-right .control-btn .ico{font-size:22px}
-  .controls-left .control-btn span,.controls-right .control-btn span{font-size:9px}
-  .camera-section.camera-small,.camera-section.camera-medium,.camera-section.camera-large{min-height:100px;max-height:160px}
+/* ─── Мобильная адаптация ─── */
+@media(max-width:500px){
+  .inner{padding:12px}
+  .header-title{font-size:17px}
+  
+  .shutter-layout{gap:8px}
+  
+  .shutter-row{flex-direction:column !important;gap:8px !important;align-items:stretch !important}
+  
+  .camera-section{width:100% !important;flex:none !important;min-height:130px !important;max-height:200px !important;order:2 !important}
+  
+  /* Кнопки управления - компактные с текстом */
+  .controls-left,.controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;padding:0 !important}
+  .controls-left{order:1 !important;justify-content:flex-start !important}
+  .controls-right{order:3 !important;justify-content:flex-end !important}
+  
+  .controls-left .control-btn,.controls-right .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
+  .controls-left .control-btn .ico,.controls-right .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
+  .controls-left .control-btn span,.controls-right .control-btn span{display:block !important;font-size:7px !important}
+  
+  /* Dual mode */
+  .shutter-controls-dual .shutter-row{flex-direction:column !important}
+  .shutter-controls-dual .controls-left,.shutter-controls-dual .controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important}
+  .shutter-controls-dual .controls-left{justify-content:flex-start !important}
+  .shutter-controls-dual .controls-right{justify-content:flex-end !important}
+  .shutter-controls-dual .controls-left .control-btn,.shutter-controls-dual .controls-right .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
+  .shutter-controls-dual .controls-left .control-btn .ico,.shutter-controls-dual .controls-right .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
+  .shutter-controls-dual .controls-left .control-btn span,.shutter-controls-dual .controls-right .control-btn span{display:block !important;font-size:7px !important}
+  .shutter-controls-dual .shutter-row .camera-section{order:2 !important}
+  .shutter-controls-dual .shutter-row .controls-left{order:1 !important}
+  .shutter-controls-dual .shutter-row .controls-right{order:3 !important}
+  
+  /* Single mode - все положения */
+  .shutter-controls-left .shutter-row,.shutter-controls-right .shutter-row{flex-direction:column !important}
+  .shutter-controls-left .controls,.shutter-controls-right .controls{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;justify-content:center !important}
+  .shutter-controls-left .controls .control-btn,.shutter-controls-right .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
+  .shutter-controls-left .controls .control-btn .ico,.shutter-controls-right .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
+  .shutter-controls-left .controls .control-btn span,.shutter-controls-right .controls .control-btn span{display:block !important;font-size:7px !important}
+  
+  .shutter-controls-top .controls,.shutter-controls-bottom .controls{flex-direction:row !important;width:100% !important;gap:4px !important;justify-content:center !important}
+  .shutter-controls-top .controls .control-btn,.shutter-controls-bottom .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
+  .shutter-controls-top .controls .control-btn .ico,.shutter-controls-bottom .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
+  .shutter-controls-top .controls .control-btn span,.shutter-controls-bottom .controls .control-btn span{display:block !important;font-size:7px !important}
+  
+  /* Прогресс бар */
+  .progress-wrapper{width:100% !important;order:4 !important}
+  .progress-wrapper .progress-bar{height:4px !important}
+  
+  /* Статус бар */
+  .status-bar{flex-wrap:wrap !important;justify-content:center !important;padding:6px 10px !important;order:5 !important}
+  .status-dual{flex-wrap:wrap !important;justify-content:center !important;gap:4px !important;font-size:9px !important}
+  .status-left{font-size:10px !important}
+  
+  /* Шапка */
+  .header{flex-direction:column !important;align-items:stretch !important;gap:4px !important;margin-bottom:8px !important}
+  .header-right{align-items:flex-start !important;gap:2px !important}
+  .header-status{font-size:10px !important;padding:2px 10px !important}
+  .header-greet{font-size:11px !important}
+  
+  .camera-section.camera-small,.camera-section.camera-medium,.camera-section.camera-large{min-height:120px !important;max-height:180px !important}
 }
 `;
 }
@@ -399,7 +450,6 @@ class ShutterCard extends HTMLElement {
     if (cfg.motion_entity) entities.push(cfg.motion_entity);
     if (cfg.recording_entity) entities.push(cfg.recording_entity);
     
-    // Добавляем input_number если используется
     if (cfg.no_feedback && cfg.memory_type === 'input_number') {
       if (cfg.mode === 'dual') {
         if (cfg.left_input_number) entities.push(cfg.left_input_number);
@@ -474,7 +524,6 @@ class ShutterCard extends HTMLElement {
     return this._hass.states[entityId];
   }
 
-  // ─── НОВОЕ: Сохранение позиции в localStorage ───
   _savePosition(entityId, position) {
     try {
       const key = `shutter_pos_${entityId}`;
@@ -482,30 +531,23 @@ class ShutterCard extends HTMLElement {
         position: position,
         timestamp: Date.now()
       }));
-    } catch (e) {
-      // Игнорируем ошибки localStorage
-    }
+    } catch (e) {}
   }
 
-  // ─── НОВОЕ: Получение позиции из localStorage ───
   _getSavedPosition(entityId) {
     try {
       const key = `shutter_pos_${entityId}`;
       const data = localStorage.getItem(key);
       if (data) {
         const parsed = JSON.parse(data);
-        // Используем если данные не старше 24 часов
         if (Date.now() - parsed.timestamp < 86400000) {
           return parsed.position;
         }
       }
-    } catch (e) {
-      // Игнорируем ошибки
-    }
+    } catch (e) {}
     return null;
   }
 
-  // ─── НОВОЕ: Получение позиции из input_number ───
   _getInputNumberPosition(entityId) {
     const state = this._state(entityId);
     if (state && state.state !== 'unavailable' && state.state !== 'unknown') {
@@ -522,12 +564,9 @@ class ShutterCard extends HTMLElement {
     const cfg = this._config;
     let pos = 0;
     
-    // === НОВОЕ: Режим без обратной связи ===
     if (cfg.no_feedback) {
       let savedPos = null;
-      
       if (cfg.memory_type === 'input_number') {
-        // Используем input_number
         let inputId = null;
         if (cfg.mode === 'dual') {
           if (entityId === cfg.left_entity_id) inputId = cfg.left_input_number;
@@ -539,12 +578,9 @@ class ShutterCard extends HTMLElement {
           savedPos = this._getInputNumberPosition(inputId);
         }
       }
-      
-      // Fallback на localStorage
       if (savedPos === null) {
         savedPos = this._getSavedPosition(entityId);
       }
-      
       if (savedPos !== null) {
         pos = savedPos;
         if (cfg.invert_position) pos = 100 - pos;
@@ -552,13 +588,11 @@ class ShutterCard extends HTMLElement {
       }
     }
     
-    // Стандартный режим: получаем из cover
     const shutterState = this._state(entityId);
     if (shutterState) {
       const coverPos = shutterState.attributes?.current_position;
       if (coverPos !== null && coverPos !== undefined) {
         pos = coverPos;
-        // Сохраняем для возможного использования
         this._savePosition(entityId, pos);
       } else {
         const isClosed = shutterState.attributes?.is_closed;
@@ -567,7 +601,6 @@ class ShutterCard extends HTMLElement {
         this._savePosition(entityId, pos);
       }
     } else {
-      // Если состояние недоступно, пробуем восстановить
       const savedPos = this._getSavedPosition(entityId);
       if (savedPos !== null) {
         pos = savedPos;
@@ -582,7 +615,6 @@ class ShutterCard extends HTMLElement {
     const t = this.t;
     const cfg = this._config;
     
-    // === НОВОЕ: Статус для режима без обратной связи ===
     if (cfg.no_feedback) {
       if (this._isMoving) {
         return { text: t.status.moving || 'Движется...', dot: 'orange', color: '#f59e0b' };
@@ -711,10 +743,8 @@ class ShutterCard extends HTMLElement {
     if (!entityId) { this._dragSide = null; return; }
     const targetPos = Math.round(this._dragTarget);
     
-    // Сохраняем позицию
     this._savePosition(entityId, targetPos);
     
-    // Если есть input_number, обновляем его
     if (cfg.no_feedback && cfg.memory_type === 'input_number') {
       let inputId = null;
       if (cfg.mode === 'dual') {
@@ -741,7 +771,6 @@ class ShutterCard extends HTMLElement {
     e.preventDefault();
   }
 
-  // ─── НОВОЕ: Обновление шкалы прогресса ───
   _updateProgressBar(side, pos) {
     const fill = this.shadowRoot?.querySelector(`.progress-fill.${side}`);
     const label = this.shadowRoot?.querySelector(`.progress-label.${side}`);
@@ -753,12 +782,10 @@ class ShutterCard extends HTMLElement {
     }
   }
 
-  // ─── НОВОЕ: Анимация движения ───
   _setMoving(state) {
     this._isMoving = state;
     if (state) {
       if (this._movementTimer) clearTimeout(this._movementTimer);
-      // Автоматически снимаем флаг движения через 30 секунд
       this._movementTimer = setTimeout(() => {
         this._isMoving = false;
         this._update();
@@ -914,7 +941,6 @@ class ShutterCard extends HTMLElement {
     const timeStr = now.toLocaleTimeString();
     const showLive = showCamera && cameraUrl;
     
-    // === НОВОЕ: Бейдж "Без обратной связи" ===
     const noFeedbackBadge = cfg.no_feedback ? `
       <span class="no-feedback-badge">📡 Без ОС</span>
     ` : '';
@@ -995,7 +1021,7 @@ class ShutterCard extends HTMLElement {
     const showStatusBar = cfg.show_status !== false;
     const showPosition = cfg.show_position !== false;
 
-    // Кнопки для dual mode
+    // Кнопки для dual mode (слева для левой, справа для правой)
     let leftControlsHtml = '', rightControlsHtml = '';
     
     if (isDual && cfg.show_controls !== false) {
@@ -1033,7 +1059,7 @@ class ShutterCard extends HTMLElement {
       `;
     }
 
-    // Single mode controls
+    // Single mode controls (все 4 варианта)
     let controlsTopHtml = '', controlsBottomHtml = '', controlsLeftHtmlSingle = '', controlsRightHtmlSingle = '';
     const controlsPos = cfg.controls_position || 'bottom';
 
@@ -1069,7 +1095,7 @@ class ShutterCard extends HTMLElement {
       try { greetText = t.greet ? t.greet() : ''; } catch (_) { greetText = ''; }
     }
 
-    // Статус в шапке
+    // Статус в шапке (управляется show_status)
     let headerStatusHtml = '';
     if (!isDual && showStatusBar) {
       headerStatusHtml = `
@@ -1339,21 +1365,47 @@ class ShutterCard extends HTMLElement {
           const service = action === 'open' ? 'open_cover' : action === 'stop' ? 'stop_cover' : 'close_cover';
           this._hass.callService('cover', service, { entity_id: entityId });
           
-          // Обновляем состояние через некоторое время
-          setTimeout(() => {
-            this._setMoving(false);
-            if (side === 'left') {
-              const newPos = this._getPosition(cfg.left_entity_id);
-              this._leftPos = newPos;
-              this._updateOverlay('left', newPos, cfg.left_color_blind);
-              this._updateProgressBar('left', newPos);
-            } else {
-              const newPos = this._getPosition(cfg.right_entity_id);
-              this._rightPos = newPos;
-              this._updateOverlay('right', newPos, cfg.right_color_blind);
-              this._updateProgressBar('right', newPos);
-            }
-          }, 300);
+          // Эмуляция изменения позиции для режима без ОС
+          if (cfg.no_feedback) {
+            setTimeout(() => {
+              let newPos = this._leftPos;
+              if (side === 'left') {
+                if (action === 'open') newPos = 100;
+                else if (action === 'close') newPos = 0;
+                else if (action === 'stop') newPos = this._leftPos;
+                this._leftPos = newPos;
+                this._updateOverlay('left', newPos, cfg.left_color_blind);
+                this._updateProgressBar('left', newPos);
+                this._savePosition(cfg.left_entity_id, newPos);
+              } else {
+                if (action === 'open') newPos = 100;
+                else if (action === 'close') newPos = 0;
+                else if (action === 'stop') newPos = this._rightPos;
+                this._rightPos = newPos;
+                this._updateOverlay('right', newPos, cfg.right_color_blind);
+                this._updateProgressBar('right', newPos);
+                this._savePosition(cfg.right_entity_id, newPos);
+              }
+              this._update();
+              this._setMoving(false);
+            }, 300);
+          } else {
+            // Стандартный режим - обновляем из состояния
+            setTimeout(() => {
+              this._setMoving(false);
+              if (side === 'left') {
+                const newPos = this._getPosition(cfg.left_entity_id);
+                this._leftPos = newPos;
+                this._updateOverlay('left', newPos, cfg.left_color_blind);
+                this._updateProgressBar('left', newPos);
+              } else {
+                const newPos = this._getPosition(cfg.right_entity_id);
+                this._rightPos = newPos;
+                this._updateOverlay('right', newPos, cfg.right_color_blind);
+                this._updateProgressBar('right', newPos);
+              }
+            }, 300);
+          }
         });
       });
 
@@ -1384,50 +1436,98 @@ class ShutterCard extends HTMLElement {
             if (!cfg.entity_id || !this._hass) return;
             const id = btn.id;
             let service = '';
-            if (id === 'btn-open') service = 'open_cover';
-            else if (id === 'btn-stop') service = 'stop_cover';
-            else if (id === 'btn-close') service = 'close_cover';
+            let action = '';
+            if (id === 'btn-open') { service = 'open_cover'; action = 'open'; }
+            else if (id === 'btn-stop') { service = 'stop_cover'; action = 'stop'; }
+            else if (id === 'btn-close') { service = 'close_cover'; action = 'close'; }
             else return;
             
             // Показываем анимацию движения
             this._setMoving(true);
             
             this._hass.callService('cover', service, { entity_id: cfg.entity_id });
-            setTimeout(() => {
-              this._setMoving(false);
-              const newPos = this._getPosition(cfg.entity_id);
-              this._leftPos = newPos;
-              this._updateOverlay('single', newPos, cfg.color_blind);
-              this._updateProgressBar('single', newPos);
-              
-              // Обновляем статус в шапке
-              if (cfg.show_status !== false) {
-                const headerStatus = this.shadowRoot?.querySelector('.header-status');
-                if (headerStatus) {
+            
+            // Эмуляция изменения позиции для режима без ОС
+            if (cfg.no_feedback) {
+              setTimeout(() => {
+                let newPos = this._leftPos;
+                if (action === 'open') newPos = 100;
+                else if (action === 'close') newPos = 0;
+                else if (action === 'stop') newPos = this._leftPos;
+                
+                this._leftPos = newPos;
+                this._updateOverlay('single', newPos, cfg.color_blind);
+                this._updateProgressBar('single', newPos);
+                this._savePosition(cfg.entity_id, newPos);
+                
+                // Обновляем статус в шапке
+                if (cfg.show_status !== false) {
+                  const headerStatus = this.shadowRoot?.querySelector('.header-status');
+                  if (headerStatus) {
+                    const state = this._state(cfg.entity_id);
+                    const status = this._getStatusText(newPos, state);
+                    const dot = headerStatus.querySelector('.dot');
+                    let textNode = null;
+                    for (let node of headerStatus.childNodes) {
+                      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                        textNode = node;
+                        break;
+                      }
+                    }
+                    if (!textNode) textNode = headerStatus.lastChild;
+                    if (dot) dot.className = `dot ${status.dot}`;
+                    if (textNode) textNode.textContent = status.text;
+                  }
+                }
+                // Обновляем позицию в статус-баре
+                const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
+                if (statusLeft) {
                   const state = this._state(cfg.entity_id);
                   const status = this._getStatusText(newPos, state);
-                  const dot = headerStatus.querySelector('.dot');
-                  let textNode = null;
-                  for (let node of headerStatus.childNodes) {
-                    if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-                      textNode = node;
-                      break;
-                    }
-                  }
-                  if (!textNode) textNode = headerStatus.lastChild;
-                  if (dot) dot.className = `dot ${status.dot}`;
-                  if (textNode) textNode.textContent = status.text;
+                  statusLeft.textContent = `${Math.round(newPos)}%`;
+                  statusLeft.style.color = status.color;
                 }
-              }
-              // Обновляем позицию в статус-баре
-              const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
-              if (statusLeft) {
-                const state = this._state(cfg.entity_id);
-                const status = this._getStatusText(newPos, state);
-                statusLeft.textContent = `${Math.round(newPos)}%`;
-                statusLeft.style.color = status.color;
-              }
-            }, 300);
+                
+                this._setMoving(false);
+              }, 300);
+            } else {
+              // Стандартный режим - обновляем из состояния
+              setTimeout(() => {
+                this._setMoving(false);
+                const newPos = this._getPosition(cfg.entity_id);
+                this._leftPos = newPos;
+                this._updateOverlay('single', newPos, cfg.color_blind);
+                this._updateProgressBar('single', newPos);
+                
+                // Обновляем статус в шапке
+                if (cfg.show_status !== false) {
+                  const headerStatus = this.shadowRoot?.querySelector('.header-status');
+                  if (headerStatus) {
+                    const state = this._state(cfg.entity_id);
+                    const status = this._getStatusText(newPos, state);
+                    const dot = headerStatus.querySelector('.dot');
+                    let textNode = null;
+                    for (let node of headerStatus.childNodes) {
+                      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                        textNode = node;
+                        break;
+                      }
+                    }
+                    if (!textNode) textNode = headerStatus.lastChild;
+                    if (dot) dot.className = `dot ${status.dot}`;
+                    if (textNode) textNode.textContent = status.text;
+                  }
+                }
+                // Обновляем позицию в статус-баре
+                const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
+                if (statusLeft) {
+                  const state = this._state(cfg.entity_id);
+                  const status = this._getStatusText(newPos, state);
+                  statusLeft.textContent = `${Math.round(newPos)}%`;
+                  statusLeft.style.color = status.color;
+                }
+              }, 300);
+            }
           });
         }
       }
@@ -1468,7 +1568,7 @@ class ShutterCard extends HTMLElement {
 }
 
 // ─── EDITOR ──────────────────────────────────────────────────────────────
-// (Editor code остается без изменений, за исключением добавления новых полей)
+// (Editor код сохранен из предыдущей версии - для краткости опущен)
 class ShutterCardEditor extends HTMLElement {
   constructor() {
     super();
@@ -1790,7 +1890,7 @@ class ShutterCardEditor extends HTMLElement {
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">v1.1.0 — Шкала прогресса + Режим без ОС</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.1.0 — Шкала прогресса + Режим без ОС + Мобильная адаптация + Эмуляция</span>
         </div>
 
         <!-- Language -->
@@ -2029,7 +2129,7 @@ class ShutterCardEditor extends HTMLElement {
           </div>
         </div>
 
-        <!-- === НОВОЕ: Advanced Settings === -->
+        <!-- Advanced Settings -->
         <div class="acc-wrap">
           <div class="acc-head" id="head-advanced">
             <span>⚙️ Расширенные настройки</span>
@@ -2183,7 +2283,6 @@ class ShutterCardEditor extends HTMLElement {
         this._render();
       }));
 
-    // === НОВОЕ: Progress style ===
     sr.querySelectorAll('[data-progress-style]').forEach(btn =>
       btn.addEventListener('click', () => {
         this._config.progress_bar_style = btn.dataset.progressStyle;
@@ -2191,7 +2290,6 @@ class ShutterCardEditor extends HTMLElement {
         this._render();
       }));
 
-    // === НОВОЕ: Memory type ===
     sr.querySelectorAll('[data-memory-type]').forEach(btn =>
       btn.addEventListener('click', () => {
         this._config.memory_type = btn.dataset.memoryType;
@@ -2423,11 +2521,9 @@ class ShutterCardEditor extends HTMLElement {
       tog.addEventListener('change', () => {
         this._config[tog.dataset.key] = tog.checked;
         this._fire();
-        // Если включили/выключили no_feedback, перерендерим
         if (tog.dataset.key === 'no_feedback') {
           this._render();
         }
-        // Если включили/выключили show_progress_bar, обновим
         if (tog.dataset.key === 'show_progress_bar') {
           this._fire();
         }
@@ -2459,7 +2555,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.1.0 %c Шкала прогресса + Режим без обратной связи!',
+  '%c 🪟 Shutter Card %c v1.1.0 %c Шкала прогресса + Режим без ОС + Мобильная адаптация + Эмуляция!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
