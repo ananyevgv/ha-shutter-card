@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.1.0 — Шкала прогресса + Режим без датчика положения + Мобильная адаптация + Эмуляция без ОС
+// v1.2.2 — Исправлено: сброс tilt при перезагрузке карточки + корректное обновление ламелей
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
@@ -75,6 +75,13 @@ const SHUTTER_DEFAULT_CONFIG = {
   left_color_blind: 'rgba(26, 26, 46, 0.85)',
   right_color_blind: 'rgba(26, 26, 46, 0.85)',
   
+  // Tilt (наклон ламелей)
+  tilt_entity_id: '',
+  tilt_entity_left: '',
+  tilt_entity_right: '',
+  show_tilt_controls: false,
+  show_tilt_visual: true,
+  
   // Режим без датчика положения
   no_feedback: false,
   memory_type: 'localstorage',
@@ -130,19 +137,19 @@ function getShutterCSS(haTheme) {
   return `
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :host{display:block;font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif}
+
+/* ─── Card ─────────────────────────────────────────────────────────────── */
 .card{background:${bgGrad};border-radius:24px;border:1px solid ${theme.border};
   overflow:hidden;position:relative;box-shadow:${theme.card_shadow},inset 0 1px 0 rgba(255,255,255,0.04)}
 .card::before{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(ellipse at 70% 30%,rgba(0,150,255,0.04),transparent 60%)}
 .inner{position:relative;z-index:1;padding:18px 18px 14px}
 
-/* ─── Main Layout ── */
+/* ─── Layout ───────────────────────────────────────────────────────────── */
 .shutter-layout{display:flex;flex-direction:column;gap:10px;position:relative}
-
-/* ─── Camera + Controls Row ── */
 .shutter-row{display:flex;align-items:stretch;gap:10px;width:100%;flex-wrap:wrap}
 
-/* ─── Camera Section ── */
+/* ─── Camera ───────────────────────────────────────────────────────────── */
 .camera-section{flex:1;position:relative;border-radius:12px;overflow:hidden;
   background:rgba(0,0,0,0.5);border:1px solid ${theme.border};
   min-height:120px;display:flex;align-items:center;justify-content:center;z-index:1;
@@ -155,7 +162,7 @@ function getShutterCSS(haTheme) {
 .camera-section.camera-medium{min-height:150px;max-height:220px}
 .camera-section.camera-large{min-height:200px;max-height:300px}
 
-/* ─── Camera Overlays (под шторкой) ── */
+/* ─── Overlays ─────────────────────────────────────────────────────────── */
 .camera-overlays{position:absolute;inset:0;pointer-events:none;z-index:1;border-radius:12px;overflow:hidden}
 .camera-overlay-top{position:absolute;top:0;left:0;right:0;padding:8px 10px;
   display:flex;justify-content:space-between;align-items:flex-start;
@@ -179,25 +186,46 @@ function getShutterCSS(haTheme) {
 .camera-overlay .recording-indicator .rec-dot{width:6px;height:6px;border-radius:50%;
   background:#ef4444;animation:pulse 0.8s ease-in-out infinite}
 
-/* ─── Фоновое изображение для шторки ── */
-.camera-section .shutter-bg-image {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-  border-radius: 12px;
-}
+/* ─── Фоновое изображение ─────────────────────────────────────────────── */
+.camera-section .shutter-bg-image{position:absolute;inset:0;z-index:0;
+  background-size:cover;background-position:center;background-repeat:no-repeat;
+  opacity:0.6;border-radius:12px}
 
-/* ─── Детализированная шторка (над оверлеем) ── */
+/* ─── Шторка и ламели ──────────────────────────────────────────────────── */
 .camera-shutters-overlay{position:absolute;inset:0;z-index:2;display:flex;pointer-events:none;border-radius:12px;overflow:hidden}
 .camera-shutters-overlay .shutter-half{flex:1;position:relative;overflow:hidden;pointer-events:auto}
-.camera-shutters-overlay .shutter-half .blind-overlay{position:absolute;inset:0;transform-origin:top center;transition:transform 0.6s cubic-bezier(0.4,0,0.2,1);pointer-events:none}
-.camera-shutters-overlay .shutter-half .blind-overlay .slat{position:absolute;left:0;right:0;height:3px;background:rgba(0,0,0,0.2);border-bottom:1px solid rgba(255,255,255,0.06)}
+
+.camera-shutters-overlay .shutter-half .blind-overlay{position:absolute;inset:0;
+  pointer-events:none;
+  background: transparent;}
+
+.camera-shutters-overlay .shutter-half .blind-overlay .slat{position:absolute;left:2%;right:2%;
+  border-radius:2px;transform-origin:center center;
+  transition:transform 0.5s ease,top 0.5s ease,opacity 0.5s ease,height 0.5s ease;
+  pointer-events:none;
+  box-shadow:0 1px 3px rgba(0,0,0,0.3),inset 0 1px 1px rgba(255,255,255,0.08),inset 0 -1px 1px rgba(0,0,0,0.15)}
+.camera-shutters-overlay .shutter-half .blind-overlay .slat:nth-child(even){filter:brightness(1.08)}
+.camera-shutters-overlay .shutter-half .blind-overlay .slat:nth-child(odd){filter:brightness(0.92)}
+.camera-shutters-overlay .shutter-half .blind-overlay .slat::after{content:'';position:absolute;inset:0;border-radius:2px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.05) 0%,transparent 15%,transparent 85%,rgba(0,0,0,0.08) 100%);
+  pointer-events:none}
 .camera-shutters-overlay .shutter-divider{width:2px;background:rgba(255,255,255,0.15);flex-shrink:0;z-index:3;pointer-events:none}
 
+/* ─── Tilt Controls ────────────────────────────────────────────────────── */
+.tilt-controls{display:flex;gap:4px;justify-content:center;padding:2px 0;order:2}
+.tilt-controls .tilt-btn{flex:1;max-width:50px;padding:4px 6px;border-radius:8px;
+  border:1px solid ${theme.border};background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
+  cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;
+  font-family:inherit;color:${theme.text_muted};font-size:8px;font-weight:600}
+.tilt-controls .tilt-btn:hover{background:${haTheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
+  border-color:${haTheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}}
+.tilt-controls .tilt-btn:active{transform:scale(0.95)}
+.tilt-controls .tilt-btn .ico{font-size:14px;line-height:1.2}
+.tilt-controls .tilt-btn.tilt-up:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
+.tilt-controls .tilt-btn.tilt-down:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
+.tilt-controls .tilt-btn.tilt-reset:hover{border-color:#f59e0b;color:#f59e0b}
+
+/* ─── Offline / Loading ────────────────────────────────────────────────── */
 .camera-section .camera-offline{display:flex;align-items:center;justify-content:center;height:100%;
   font-size:14px;color:rgba(255,255,255,0.3);flex-direction:column;gap:8px;width:100%;padding:20px}
 .camera-section .camera-offline .ico{font-size:32px}
@@ -205,15 +233,14 @@ function getShutterCSS(haTheme) {
   background:rgba(0,0,0,0.5);color:rgba(255,255,255,0.6);font-size:12px;z-index:3}
 .camera-section .camera-loading .spinner{width:24px;height:24px;border:3px solid rgba(255,255,255,0.1);
   border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite;margin-right:10px}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
 
+/* ─── Drag Handle ──────────────────────────────────────────────────────── */
 .drag-handle{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:6;
   width:40px;height:4px;border-radius:2px;background:rgba(255,255,255,0.3);
   pointer-events:none;transition:opacity 0.3s}
 .camera-section:hover .drag-handle{opacity:0.8}
 
-/* ─── Header ── */
+/* ─── Header ───────────────────────────────────────────────────────────── */
 .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:6px}
 .header-left{display:flex;flex-direction:column;gap:2px}
 .header-title{font-size:20px;font-weight:700;color:${theme.text_primary};letter-spacing:-0.3px}
@@ -222,20 +249,18 @@ function getShutterCSS(haTheme) {
 .header-greet{font-size:12px;color:${theme.text_secondary}}
 .header-status{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;
   background:${haTheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'};
-  border:1px solid ${theme.border};
-  font-size:11px;font-weight:600;color:${theme.text_secondary}}
+  border:1px solid ${theme.border};font-size:11px;font-weight:600;color:${theme.text_secondary}}
 .header-status .dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 .dot.green{background:var(--cv-open,#4ade80);animation:pulse 2s ease-in-out infinite}
 .dot.orange{background:#f59e0b;animation:pulse 1.5s ease-in-out infinite}
 .dot.red{background:var(--cv-closed,#ef4444);animation:pulse 0.8s ease-in-out infinite}
 .dot.off{background:#6b7280}
 
-/* ─── Progress Bar ── */
+/* ─── Progress Bar ────────────────────────────────────────────────────── */
 .progress-wrapper{width:100%;padding:2px 0;order:3}
 .progress-bar{width:100%;height:6px;border-radius:4px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'};
   overflow:hidden;position:relative;transition:opacity 0.3s}
-.progress-bar .progress-fill{height:100%;border-radius:4px;transition:width 0.4s cubic-bezier(0.4,0,0.2,1);
-  position:relative;width:0%}
+.progress-bar .progress-fill{height:100%;border-radius:4px;transition:width 0.4s cubic-bezier(0.4,0,0.2,1);position:relative;width:0%}
 .progress-bar .progress-fill.gradient{background:linear-gradient(90deg,var(--cv-closed,#ef4444),var(--cv-accent,#00d4ff),var(--cv-open,#4ade80))}
 .progress-bar .progress-fill.solid{background:var(--cv-accent,#00d4ff)}
 .progress-bar .progress-fill.animated{animation:progressPulse 1.5s ease-in-out infinite}
@@ -243,15 +268,13 @@ function getShutterCSS(haTheme) {
   font-size:8px;font-weight:700;color:${theme.text_primary};opacity:0.8;text-shadow:0 1px 4px rgba(0,0,0,0.5);
   pointer-events:none;display:none}
 .progress-bar:hover .progress-label{display:block}
-@keyframes progressPulse{0%,100%{opacity:1}50%{opacity:0.6}}
 
-/* ─── Controls ── */
+/* ─── Controls ─────────────────────────────────────────────────────────── */
 .controls{display:flex;gap:6px;justify-content:center;padding:4px 0}
 .controls .control-btn{flex:1;max-width:80px;padding:10px 6px;border-radius:12px;border:1px solid ${theme.border};
   background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
-  cursor:pointer;transition:all 0.2s;
-  display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;
-  color:${theme.text_muted};font-size:9px;font-weight:600}
+  cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-family:inherit;color:${theme.text_muted};font-size:9px;font-weight:600}
 .controls .control-btn:hover{background:${haTheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
   border-color:${haTheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}}
 .controls .control-btn:active{transform:scale(0.95)}
@@ -260,34 +283,24 @@ function getShutterCSS(haTheme) {
 .controls .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
 .controls .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
 
-/* ─── Dual mode controls (слева для левой, справа для правой) ── */
-.controls-left{display:flex;flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0;order:0}
-.controls-left .control-btn{max-width:none;padding:10px 4px;flex:1;min-height:40px;border-radius:12px;border:1px solid ${theme.border};
+/* ─── Dual Mode ────────────────────────────────────────────────────────── */
+.controls-left,.controls-right{display:flex;flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0}
+.controls-left{order:0}
+.controls-right{order:2}
+.controls-left .control-btn,.controls-right .control-btn{max-width:none;padding:10px 4px;flex:1;min-height:40px;
+  border-radius:12px;border:1px solid ${theme.border};
   background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
   cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:2px;
   font-family:inherit;color:${theme.text_muted};font-size:9px;font-weight:600}
-.controls-left .control-btn:hover{background:${haTheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
+.controls-left .control-btn:hover,.controls-right .control-btn:hover{background:${haTheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
   border-color:${haTheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}}
-.controls-left .control-btn:active{transform:scale(0.95)}
-.controls-left .control-btn .ico{font-size:18px;line-height:1.2}
-.controls-left .control-btn.open:hover{border-color:var(--cv-open,#4ade80);color:var(--cv-open,#4ade80)}
-.controls-left .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
-.controls-left .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
+.controls-left .control-btn:active,.controls-right .control-btn:active{transform:scale(0.95)}
+.controls-left .control-btn .ico,.controls-right .control-btn .ico{font-size:18px;line-height:1.2}
+.controls-left .control-btn.open:hover,.controls-right .control-btn.open:hover{border-color:var(--cv-open,#4ade80);color:var(--cv-open,#4ade80)}
+.controls-left .control-btn.stop:hover,.controls-right .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
+.controls-left .control-btn.close:hover,.controls-right .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
 
-.controls-right{display:flex;flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0;order:2}
-.controls-right .control-btn{max-width:none;padding:10px 4px;flex:1;min-height:40px;border-radius:12px;border:1px solid ${theme.border};
-  background:${haTheme === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'};
-  cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;align-items:center;gap:2px;
-  font-family:inherit;color:${theme.text_muted};font-size:9px;font-weight:600}
-.controls-right .control-btn:hover{background:${haTheme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'};
-  border-color:${haTheme === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}}
-.controls-right .control-btn:active{transform:scale(0.95)}
-.controls-right .control-btn .ico{font-size:18px;line-height:1.2}
-.controls-right .control-btn.open:hover{border-color:var(--cv-open,#4ade80);color:var(--cv-open,#4ade80)}
-.controls-right .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
-.controls-right .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
-
-/* ─── Single mode controls ── */
+/* ─── Single Mode ──────────────────────────────────────────────────────── */
 .shutter-controls-left .shutter-row{flex-direction:row}
 .shutter-controls-left .controls{flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0}
 .shutter-controls-left .controls .control-btn{max-width:none;padding:10px 4px;flex:1;min-height:40px}
@@ -308,7 +321,7 @@ function getShutterCSS(haTheme) {
 .shutter-controls-bottom .controls .control-btn{max-width:80px}
 .shutter-controls-bottom .shutter-row{flex-direction:column}
 
-/* ─── Status Bar ── */
+/* ─── Status Bar ───────────────────────────────────────────────────────── */
 .status-bar{display:flex;justify-content:space-between;align-items:center;
   padding:8px 12px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'};
   border-radius:8px;border:1px solid ${theme.border};flex-wrap:wrap;gap:4px;
@@ -317,33 +330,32 @@ function getShutterCSS(haTheme) {
 .status-left .state{font-weight:600;color:${theme.text_secondary}}
 .status-dual{display:flex;align-items:center;gap:12px;font-size:10px;color:${theme.text_muted}}
 
-/* ─── No feedback badge ── */
+/* ─── Badges ───────────────────────────────────────────────────────────── */
 .no-feedback-badge{display:inline-flex;align-items:center;gap:4px;
   font-size:9px;color:${theme.text_muted};padding:2px 8px;
   border-radius:10px;background:${haTheme === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'};
   border:1px solid ${theme.border}}
 
-/* ─── Мобильная адаптация ─── */
+/* ─── Animations ───────────────────────────────────────────────────────── */
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
+@keyframes progressPulse{0%,100%{opacity:1}50%{opacity:0.6}}
+
+/* ─── Mobile ───────────────────────────────────────────────────────────── */
 @media(max-width:500px){
   .inner{padding:12px}
   .header-title{font-size:17px}
-  
   .shutter-layout{gap:8px}
-  
   .shutter-row{flex-direction:column !important;gap:8px !important;align-items:stretch !important}
-  
   .camera-section{width:100% !important;flex:none !important;min-height:130px !important;max-height:200px !important;order:2 !important}
-  
-  /* Кнопки управления - компактные с текстом */
+
   .controls-left,.controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;padding:0 !important}
   .controls-left{order:1 !important;justify-content:flex-start !important}
   .controls-right{order:3 !important;justify-content:flex-end !important}
-  
   .controls-left .control-btn,.controls-right .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .controls-left .control-btn .ico,.controls-right .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .controls-left .control-btn span,.controls-right .control-btn span{display:block !important;font-size:7px !important}
-  
-  /* Dual mode */
+
   .shutter-controls-dual .shutter-row{flex-direction:column !important}
   .shutter-controls-dual .controls-left,.shutter-controls-dual .controls-right{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important}
   .shutter-controls-dual .controls-left{justify-content:flex-start !important}
@@ -354,35 +366,35 @@ function getShutterCSS(haTheme) {
   .shutter-controls-dual .shutter-row .camera-section{order:2 !important}
   .shutter-controls-dual .shutter-row .controls-left{order:1 !important}
   .shutter-controls-dual .shutter-row .controls-right{order:3 !important}
-  
-  /* Single mode - все положения */
+
   .shutter-controls-left .shutter-row,.shutter-controls-right .shutter-row{flex-direction:column !important}
   .shutter-controls-left .controls,.shutter-controls-right .controls{flex-direction:row !important;width:100% !important;min-width:unset !important;gap:4px !important;justify-content:center !important}
   .shutter-controls-left .controls .control-btn,.shutter-controls-right .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .shutter-controls-left .controls .control-btn .ico,.shutter-controls-right .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .shutter-controls-left .controls .control-btn span,.shutter-controls-right .controls .control-btn span{display:block !important;font-size:7px !important}
-  
+
   .shutter-controls-top .controls,.shutter-controls-bottom .controls{flex-direction:row !important;width:100% !important;gap:4px !important;justify-content:center !important}
   .shutter-controls-top .controls .control-btn,.shutter-controls-bottom .controls .control-btn{flex:0 1 auto !important;max-width:70px !important;min-height:36px !important;padding:4px 6px !important;font-size:8px !important}
   .shutter-controls-top .controls .control-btn .ico,.shutter-controls-bottom .controls .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .shutter-controls-top .controls .control-btn span,.shutter-controls-bottom .controls .control-btn span{display:block !important;font-size:7px !important}
-  
-  /* Прогресс бар */
+
   .progress-wrapper{width:100% !important;order:4 !important}
   .progress-wrapper .progress-bar{height:4px !important}
-  
-  /* Статус бар */
+
   .status-bar{flex-wrap:wrap !important;justify-content:center !important;padding:6px 10px !important;order:5 !important}
   .status-dual{flex-wrap:wrap !important;justify-content:center !important;gap:4px !important;font-size:9px !important}
   .status-left{font-size:10px !important}
-  
-  /* Шапка */
+
   .header{flex-direction:column !important;align-items:stretch !important;gap:4px !important;margin-bottom:8px !important}
   .header-right{align-items:flex-start !important;gap:2px !important}
   .header-status{font-size:10px !important;padding:2px 10px !important}
   .header-greet{font-size:11px !important}
-  
+
   .camera-section.camera-small,.camera-section.camera-medium,.camera-section.camera-large{min-height:120px !important;max-height:180px !important}
+
+  .tilt-controls{order:3 !important;width:100% !important}
+  .tilt-controls .tilt-btn{max-width:60px !important;padding:4px 8px !important;font-size:8px !important}
+  .tilt-controls .tilt-btn .ico{font-size:14px !important}
 }
 `;
 }
@@ -400,12 +412,15 @@ class ShutterCard extends HTMLElement {
     this._container = null;
     this._leftPos = 0;
     this._rightPos = 0;
+    this._leftTilt = 50;
+    this._rightTilt = 50;
     this._haTheme = 'dark';
     this._isDragging = false;
     this._dragStartY = 0;
     this._dragStartPos = 0;
     this._dragTarget = 0;
     this._dragSide = null;
+    this._dragMode = 'position';
     this._subscribeEntities = [];
     this._isMoving = false;
     this._movementTimer = null;
@@ -424,6 +439,8 @@ class ShutterCard extends HTMLElement {
       controls_position: 'bottom',
       show_progress_bar: true,
       no_feedback: false,
+      show_tilt_controls: false,
+      show_tilt_visual: true,
     };
   }
 
@@ -437,14 +454,49 @@ class ShutterCard extends HTMLElement {
     return getHATheme(this._config.theme || 'auto');
   }
 
+  // ─── Работа с цветами ──────────────────────────────────────────────────
+  _adjustColorBrightness(color, brightness) {
+    if (!color) return `rgba(60, 60, 80, ${0.9 * brightness})`;
+    
+    const rgbaMatch = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (rgbaMatch) {
+      const r = Math.min(255, Math.round(parseInt(rgbaMatch[1]) * brightness));
+      const g = Math.min(255, Math.round(parseInt(rgbaMatch[2]) * brightness));
+      const b = Math.min(255, Math.round(parseInt(rgbaMatch[3]) * brightness));
+      const a = rgbaMatch[4] ? parseFloat(rgbaMatch[4]) : 1;
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+    
+    if (color.startsWith('#')) {
+      const hex = color.replace('#', '');
+      let r, g, b;
+      if (hex.length === 3) {
+        r = parseInt(hex[0] + hex[0], 16);
+        g = parseInt(hex[1] + hex[1], 16);
+        b = parseInt(hex[2] + hex[2], 16);
+      } else {
+        r = parseInt(hex.substring(0, 2), 16);
+        g = parseInt(hex.substring(2, 4), 16);
+        b = parseInt(hex.substring(4, 6), 16);
+      }
+      return `rgb(${Math.min(255, Math.round(r * brightness))}, ${Math.min(255, Math.round(g * brightness))}, ${Math.min(255, Math.round(b * brightness))})`;
+    }
+    
+    return color;
+  }
+
+  // ─── Работа с сущностями ──────────────────────────────────────────────
   hassSubscribe() {
     const entities = [];
     const cfg = this._config;
     if (cfg.mode === 'dual') {
       if (cfg.left_entity_id) entities.push(cfg.left_entity_id);
       if (cfg.right_entity_id) entities.push(cfg.right_entity_id);
+      if (cfg.tilt_entity_left) entities.push(cfg.tilt_entity_left);
+      if (cfg.tilt_entity_right) entities.push(cfg.tilt_entity_right);
     } else {
       if (cfg.entity_id) entities.push(cfg.entity_id);
+      if (cfg.tilt_entity_id) entities.push(cfg.tilt_entity_id);
     }
     if (cfg.camera_entity) entities.push(cfg.camera_entity);
     if (cfg.motion_entity) entities.push(cfg.motion_entity);
@@ -466,6 +518,9 @@ class ShutterCard extends HTMLElement {
   setConfig(config) {
     this._config = { ...SHUTTER_DEFAULT_CONFIG, ...config };
     this._haTheme = this._getHATheme();
+    // ✅ Сбрасываем tilt при загрузке конфигурации
+    this._leftTilt = 50;
+    this._rightTilt = 50;
     this._initialized = false;
     this._render();
   }
@@ -524,6 +579,7 @@ class ShutterCard extends HTMLElement {
     return this._hass.states[entityId];
   }
 
+  // ─── Сохранение позиции ──────────────────────────────────────────────
   _savePosition(entityId, position) {
     try {
       const key = `shutter_pos_${entityId}`;
@@ -557,6 +613,19 @@ class ShutterCard extends HTMLElement {
       }
     }
     return null;
+  }
+
+  // ─── Получение позиции и наклона ─────────────────────────────────────
+  _getTilt(entityId) {
+    if (!entityId) return 50;
+    const state = this._state(entityId);
+    if (state) {
+      const tilt = state.attributes?.current_tilt_position;
+      if (tilt !== null && tilt !== undefined) {
+        return Math.max(0, Math.min(100, tilt));
+      }
+    }
+    return 50;
   }
 
   _getPosition(entityId) {
@@ -629,10 +698,12 @@ class ShutterCard extends HTMLElement {
       if (pos >= 99) return { text: t.status.open, dot: 'green', color: cfg.color_open || '#4ade80' };
       return { text: t.status.partial(pos), dot: 'orange', color: '#f59e0b' };
     }
+    
     const isClosed = state.attributes?.is_closed;
     const isOpening = state.attributes?.is_opening;
     const isClosing = state.attributes?.is_closing;
     const stateVal = state.state;
+    
     if (isOpening === true || stateVal === 'opening') {
       return { text: t.status.opening, dot: 'orange', color: '#f59e0b' };
     } else if (isClosing === true || stateVal === 'closing') {
@@ -670,23 +741,158 @@ class ShutterCard extends HTMLElement {
     }
   }
 
-  _generateSlats() {
+  // ─── Генерация ламелей (24 шт) ──────────────────────────────────────
+  // position влияет на количество видимых ламелей (сверху вниз)
+  // tilt влияет на ширину/угол каждой ламели
+  _generateSlats(pos, tilt, color, isDark) {
     let slats = '';
-    for (let i = 0; i < 24; i++) {
-      const y = (i / 24) * 100;
-      slats += `<div class="slat" style="top:${y}%;"></div>`;
+    const numSlats = 24;
+    const baseColor = color || (isDark ? 'rgba(60, 60, 80, 0.9)' : 'rgba(210, 210, 220, 0.9)');
+    
+    const p = (pos !== undefined && pos !== null) ? Math.max(0, Math.min(100, pos)) : 0;
+    const t = (tilt !== undefined && tilt !== null) ? Math.max(0, Math.min(100, tilt)) : 50;
+    
+    // Количество видимых ламелей (зависит от position)
+    // position=0% → 24 ламели, position=100% → 0 ламелей
+    const visibleCount = Math.round(numSlats * (1 - p / 100));
+    
+    // Наклон: при 50 — широкие, при 0 или 100 — узкие
+    const distanceFromCenter = Math.abs(t - 50) / 50;
+    const heightFactor = 1.0 - 0.95 * distanceFromCenter;
+    const angleDeg = ((t - 50) / 50) * 90;
+    
+    // Высота каждой ламели
+    const slatHeight = 100 / numSlats;
+    const gap = (1 - heightFactor) * slatHeight;
+    
+    for (let i = 0; i < numSlats; i++) {
+      // Ламели появляются сверху: i=0 — самая верхняя
+      if (i >= visibleCount) {
+        continue;
+      }
+      
+      const y = i * slatHeight + gap / 2;
+      const isEven = i % 2 === 0;
+      const slatAngle = isEven ? angleDeg : -angleDeg * 0.6;
+      const brightness = 0.7 + 0.3 * (isEven ? 1 : 0.85);
+      const slatColor = this._adjustColorBrightness(baseColor, brightness);
+      
+      slats += `<div class="slat" style="
+        top:${y}%;
+        height:${heightFactor * slatHeight}%;
+        transform: rotateX(${slatAngle}deg);
+        background: ${slatColor};
+        opacity: 1;
+        box-shadow: 
+          0 1px 3px rgba(0,0,0,0.3),
+          inset 0 1px 1px rgba(255,255,255,0.08),
+          inset 0 -1px 1px rgba(0,0,0,0.15);
+      "></div>`;
     }
     return slats;
   }
 
-  _updateOverlay(side, pos, blindColor) {
+  _updateOverlay(side, pos, tilt, blindColor) {
     const overlay = this.shadowRoot?.querySelector(`.shutter-half.${side} .blind-overlay`);
     if (!overlay) return;
-    const scale = pos / 100;
-    overlay.style.transform = `scaleY(${1 - scale})`;
-    if (blindColor) overlay.style.background = blindColor;
+    
+    overlay.style.transform = 'none';
+    overlay.style.background = 'transparent';
+    
+    const slats = overlay.querySelectorAll('.slat');
+    if (slats.length === 0) return;
+    
+    // ✅ Используем переданные значения
+    const p = (pos !== undefined && pos !== null) ? Math.max(0, Math.min(100, pos)) : 0;
+    const t = (tilt !== undefined && tilt !== null) ? Math.max(0, Math.min(100, tilt)) : 50;
+    const numSlats = 24;
+    const baseColor = blindColor || (this._haTheme === 'dark' ? 'rgba(60, 60, 80, 0.9)' : 'rgba(210, 210, 220, 0.9)');
+    
+    // ✅ Количество видимых ламелей пересчитывается всегда
+    const visibleCount = Math.round(numSlats * (1 - p / 100));
+    
+    // Параметры наклона
+    const distanceFromCenter = Math.abs(t - 50) / 50;
+    const heightFactor = 1.0 - 0.95 * distanceFromCenter;
+    const angleDeg = ((t - 50) / 50) * 90;
+    const slatHeight = 100 / numSlats;
+    const gap = (1 - heightFactor) * slatHeight;
+    
+    slats.forEach((slat, i) => {
+      if (i < visibleCount) {
+        const y = i * slatHeight + gap / 2;
+        const isEven = i % 2 === 0;
+        const slatAngle = isEven ? angleDeg : -angleDeg * 0.6;
+        const brightness = 0.7 + 0.3 * (isEven ? 1 : 0.85);
+        const slatColor = this._adjustColorBrightness(baseColor, brightness);
+        
+        slat.style.cssText = `
+          display: block !important;
+          position: absolute;
+          left: 2%;
+          right: 2%;
+          top: ${y}%;
+          height: ${heightFactor * slatHeight}%;
+          transform: rotateX(${slatAngle}deg);
+          transform-origin: center center;
+          background: ${slatColor};
+          opacity: 1;
+          border-radius: 2px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,0.08), inset 0 -1px 1px rgba(0,0,0,0.15);
+          pointer-events: none;
+          transition: transform 0.5s ease, top 0.5s ease, opacity 0.5s ease;
+        `;
+      } else {
+        const y = i * slatHeight + gap / 2;
+        slat.style.cssText = `
+          display: block !important;
+          position: absolute;
+          left: 2%;
+          right: 2%;
+          top: ${y}%;
+          height: ${heightFactor * slatHeight}%;
+          transform: rotateX(0deg);
+          transform-origin: center center;
+          background: transparent;
+          opacity: 0;
+          border-radius: 2px;
+          box-shadow: none;
+          pointer-events: none;
+          transition: opacity 0.5s ease, top 0.5s ease;
+        `;
+      }
+    });
   }
 
+  _updateProgressBar(side, pos) {
+    const fill = this.shadowRoot?.querySelector(`.progress-fill.${side}`);
+    const label = this.shadowRoot?.querySelector(`.progress-label.${side}`);
+    if (fill) {
+      fill.style.width = `${Math.round(pos)}%`;
+    }
+    if (label) {
+      label.textContent = `${Math.round(pos)}%`;
+    }
+  }
+
+  _setMoving(state) {
+    this._isMoving = state;
+    if (state) {
+      if (this._movementTimer) clearTimeout(this._movementTimer);
+      this._movementTimer = setTimeout(() => {
+        this._isMoving = false;
+        this._update();
+      }, 30000);
+    } else {
+      if (this._movementTimer) {
+        clearTimeout(this._movementTimer);
+        this._movementTimer = null;
+      }
+    }
+    this._update();
+  }
+
+  // ─── Drag-события для управления позицией ────────────────────────────
   _onDragStart(e, side) {
     const cfg = this._config;
     const entityId = side === 'left' ? cfg.left_entity_id : 
@@ -701,6 +907,7 @@ class ShutterCard extends HTMLElement {
                          side === 'right' ? this._rightPos : 
                          this._leftPos;
     this._dragTarget = this._dragStartPos;
+    this._dragMode = 'position';
     e.preventDefault();
   }
 
@@ -714,15 +921,15 @@ class ShutterCard extends HTMLElement {
     const cfg = this._config;
     if (this._dragSide === 'left') {
       this._leftPos = newPos;
-      this._updateOverlay('left', newPos, cfg.left_color_blind);
+      this._updateOverlay('left', newPos, this._leftTilt, cfg.left_color_blind);
       this._updateProgressBar('left', newPos);
     } else if (this._dragSide === 'right') {
       this._rightPos = newPos;
-      this._updateOverlay('right', newPos, cfg.right_color_blind);
+      this._updateOverlay('right', newPos, this._rightTilt, cfg.right_color_blind);
       this._updateProgressBar('right', newPos);
     } else {
       this._leftPos = newPos;
-      this._updateOverlay('single', newPos, cfg.color_blind);
+      this._updateOverlay('single', newPos, this._leftTilt, cfg.color_blind);
       this._updateProgressBar('single', newPos);
     }
     e.preventDefault();
@@ -771,34 +978,15 @@ class ShutterCard extends HTMLElement {
     e.preventDefault();
   }
 
-  _updateProgressBar(side, pos) {
-    const fill = this.shadowRoot?.querySelector(`.progress-fill.${side}`);
-    const label = this.shadowRoot?.querySelector(`.progress-label.${side}`);
-    if (fill) {
-      fill.style.width = `${Math.round(pos)}%`;
-    }
-    if (label) {
-      label.textContent = `${Math.round(pos)}%`;
-    }
+  _callTilt(entityId, tiltPos) {
+    if (!entityId || !this._hass) return;
+    this._hass.callService('cover', 'set_cover_tilt_position', {
+      entity_id: entityId,
+      tilt_position: Math.max(0, Math.min(100, tiltPos))
+    });
   }
 
-  _setMoving(state) {
-    this._isMoving = state;
-    if (state) {
-      if (this._movementTimer) clearTimeout(this._movementTimer);
-      this._movementTimer = setTimeout(() => {
-        this._isMoving = false;
-        this._update();
-      }, 30000);
-    } else {
-      if (this._movementTimer) {
-        clearTimeout(this._movementTimer);
-        this._movementTimer = null;
-      }
-    }
-    this._update();
-  }
-
+  // ─── Рендер ─────────────────────────────────────────────────────────────
   _render() {
     if (!this._hass) {
       this._renderUnconfigured();
@@ -810,6 +998,8 @@ class ShutterCard extends HTMLElement {
     const haTheme = this._haTheme;
     const theme = HA_THEMES[haTheme] || HA_THEMES.dark;
     const isDual = cfg.mode === 'dual';
+    const isDark = haTheme === 'dark';
+    const tiltEnabled = cfg.show_tilt_visual !== false;
     
     const accent = cfg.color_accent || '#00d4ff';
     const textColor = cfg.color_text || (haTheme === 'dark' ? '#ffffff' : '#1a202c');
@@ -819,20 +1009,40 @@ class ShutterCard extends HTMLElement {
     const bgGrad = shutterPresetGradient(cfg.background_preset, cfg.bg_color1, cfg.bg_color2, cfg.bg_alpha, haTheme);
 
     let leftStatus, rightStatus, singleStatus;
+    let leftTilt = 50, rightTilt = 50;
     
     if (isDual) {
+      // ✅ Всегда получаем свежие позиции
       const leftPos = this._getPosition(cfg.left_entity_id);
       const rightPos = this._getPosition(cfg.right_entity_id);
-      if (!this._isDragging) { this._leftPos = leftPos; this._rightPos = rightPos; }
+      this._leftPos = leftPos;
+      this._rightPos = rightPos;
+      
+      leftTilt = this._getTilt(cfg.tilt_entity_left || cfg.left_entity_id);
+      rightTilt = this._getTilt(cfg.tilt_entity_right || cfg.right_entity_id);
+      
+      if (!tiltEnabled) {
+        leftTilt = 50;
+        rightTilt = 50;
+      }
+      
+      this._leftTilt = leftTilt;
+      this._rightTilt = rightTilt;
+      
       const leftState = this._state(cfg.left_entity_id);
       const rightState = this._state(cfg.right_entity_id);
-      leftStatus = this._getStatusText(this._leftPos, leftState);
-      rightStatus = this._getStatusText(this._rightPos, rightState);
+      leftStatus = this._getStatusText(leftPos, leftState);
+      rightStatus = this._getStatusText(rightPos, rightState);
     } else {
+      // ✅ Всегда получаем свежую позицию
       const pos = this._getPosition(cfg.entity_id);
-      if (!this._isDragging) this._leftPos = pos;
+      this._leftPos = pos;
+      
+      const tilt = this._getTilt(cfg.tilt_entity_id || cfg.entity_id);
+      this._leftTilt = tiltEnabled ? tilt : 50;
+      
       const state = this._state(cfg.entity_id);
-      singleStatus = this._getStatusText(this._leftPos, state);
+      singleStatus = this._getStatusText(pos, state);
     }
 
     const showCamera = cfg.show_camera !== false && cfg.camera_entity;
@@ -841,6 +1051,7 @@ class ShutterCard extends HTMLElement {
     const bgImage = cfg.bg_image || '';
     const showProgressBar = cfg.show_progress_bar !== false;
     const progressStyle = cfg.progress_bar_style || 'gradient';
+    const showTiltControls = cfg.show_tilt_controls || false;
 
     const customCss = `
       --cv-accent: ${accent};
@@ -852,7 +1063,7 @@ class ShutterCard extends HTMLElement {
       -webkit-backdrop-filter: blur(${cfg.bg_blur || 12}px);
     `;
 
-    // ─── Шкала прогресса ───
+    // ─── Progress Bar ──────────────────────────────────────────────────
     let progressBarHtml = '';
     if (showProgressBar) {
       if (isDual) {
@@ -883,14 +1094,51 @@ class ShutterCard extends HTMLElement {
       }
     }
 
-    // Шторки
+    // ─── Tilt Controls ──────────────────────────────────────────────────
+    let tiltControlsHtml = '';
+    if (showTiltControls && tiltEnabled) {
+      if (isDual) {
+        tiltControlsHtml = `
+          <div class="tilt-controls" style="display:flex;gap:4px;justify-content:space-between;width:100%;">
+            <div style="display:flex;gap:4px;">
+              <button class="tilt-btn tilt-up" data-side="left" data-tilt="up" title="Наклон левой вверх">↕</button>
+              <button class="tilt-btn tilt-reset" data-side="left" data-tilt="reset" title="Сброс левой">⟳</button>
+              <button class="tilt-btn tilt-down" data-side="left" data-tilt="down" title="Наклон левой вниз">↕</button>
+              <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">Л</span>
+            </div>
+            <div style="display:flex;gap:4px;">
+              <button class="tilt-btn tilt-up" data-side="right" data-tilt="up" title="Наклон правой вверх">↕</button>
+              <button class="tilt-btn tilt-reset" data-side="right" data-tilt="reset" title="Сброс правой">⟳</button>
+              <button class="tilt-btn tilt-down" data-side="right" data-tilt="down" title="Наклон правой вниз">↕</button>
+              <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">П</span>
+            </div>
+          </div>
+        `;
+      } else {
+        tiltControlsHtml = `
+          <div class="tilt-controls" style="display:flex;gap:4px;justify-content:center;width:100%;">
+            <button class="tilt-btn tilt-up" data-side="single" data-tilt="up" title="Наклон вверх">↕</button>
+            <button class="tilt-btn tilt-reset" data-side="single" data-tilt="reset" title="Сброс наклона">⟳</button>
+            <button class="tilt-btn tilt-down" data-side="single" data-tilt="down" title="Наклон вниз">↕</button>
+          </div>
+        `;
+      }
+    }
+
+    // ─── Shutter Overlay ──────────────────────────────────────────────
     let shutterOverlayHtml = '';
     if (cfg.entity_id || isDual) {
       if (isDual) {
-        const leftScale = 1 - this._leftPos / 100;
-        const rightScale = 1 - this._rightPos / 100;
         const leftColor = cfg.left_color_blind || 'rgba(26,26,46,0.85)';
         const rightColor = cfg.right_color_blind || 'rgba(26,26,46,0.85)';
+        
+        const effectiveLeftTilt = tiltEnabled ? this._leftTilt : 50;
+        const effectiveRightTilt = tiltEnabled ? this._rightTilt : 50;
+        
+        // ✅ Используем свежие позиции из переменных
+        const leftSlats = this._generateSlats(this._leftPos, effectiveLeftTilt, leftColor, isDark);
+        const rightSlats = this._generateSlats(this._rightPos, effectiveRightTilt, rightColor, isDark);
+        
         let bgImageHtml = '';
         if (!showCamera && bgImage) {
           bgImageHtml = `<div class="shutter-bg-image" style="background-image: url('${bgImage}');"></div>`;
@@ -899,21 +1147,25 @@ class ShutterCard extends HTMLElement {
           <div class="camera-shutters-overlay dual">
             ${bgImageHtml}
             <div class="shutter-half left" data-side="left">
-              <div class="blind-overlay" style="transform:scaleY(${leftScale});background:${leftColor};">
-                ${this._generateSlats()}
+              <div class="blind-overlay">
+                ${leftSlats}
               </div>
             </div>
             <div class="shutter-divider"></div>
             <div class="shutter-half right" data-side="right">
-              <div class="blind-overlay" style="transform:scaleY(${rightScale});background:${rightColor};">
-                ${this._generateSlats()}
+              <div class="blind-overlay">
+                ${rightSlats}
               </div>
             </div>
           </div>
         `;
       } else {
-        const singleScale = 1 - this._leftPos / 100;
         const singleColor = cfg.color_blind || 'rgba(26,26,46,0.85)';
+        const effectiveSingleTilt = tiltEnabled ? this._leftTilt : 50;
+        
+        // ✅ Используем свежую позицию из переменной
+        const slats = this._generateSlats(this._leftPos, effectiveSingleTilt, singleColor, isDark);
+        
         let bgImageHtml = '';
         if (!showCamera && bgImage) {
           bgImageHtml = `<div class="shutter-bg-image" style="background-image: url('${bgImage}');"></div>`;
@@ -922,8 +1174,8 @@ class ShutterCard extends HTMLElement {
           <div class="camera-shutters-overlay single">
             <div class="shutter-half single" data-side="single">
               ${bgImageHtml}
-              <div class="blind-overlay" style="transform:scaleY(${singleScale});background:${singleColor};">
-                ${this._generateSlats()}
+              <div class="blind-overlay">
+                ${slats}
               </div>
             </div>
           </div>
@@ -931,7 +1183,7 @@ class ShutterCard extends HTMLElement {
       }
     }
 
-    // Оверлей (время, движение, запись)
+    // ─── Camera Overlay ──────────────────────────────────────────────────
     let overlayHtml = '';
     const motionState = this._state(cfg.motion_entity);
     const isMotion = motionState ? motionState.state === 'on' : false;
@@ -979,6 +1231,7 @@ class ShutterCard extends HTMLElement {
       </div>
     `;
 
+    // ─── Camera Section ──────────────────────────────────────────────────
     let cameraHtml = '';
     if (showCamera) {
       cameraHtml = `
@@ -1018,10 +1271,10 @@ class ShutterCard extends HTMLElement {
       `;
     }
 
+    // ─── Controls ──────────────────────────────────────────────────────
     const showStatusBar = cfg.show_status !== false;
     const showPosition = cfg.show_position !== false;
 
-    // Кнопки для dual mode (слева для левой, справа для правой)
     let leftControlsHtml = '', rightControlsHtml = '';
     
     if (isDual && cfg.show_controls !== false) {
@@ -1059,7 +1312,6 @@ class ShutterCard extends HTMLElement {
       `;
     }
 
-    // Single mode controls (все 4 варианта)
     let controlsTopHtml = '', controlsBottomHtml = '', controlsLeftHtmlSingle = '', controlsRightHtmlSingle = '';
     const controlsPos = cfg.controls_position || 'bottom';
 
@@ -1095,7 +1347,7 @@ class ShutterCard extends HTMLElement {
       try { greetText = t.greet ? t.greet() : ''; } catch (_) { greetText = ''; }
     }
 
-    // Статус в шапке (управляется show_status)
+    // ─── Header ──────────────────────────────────────────────────────────
     let headerStatusHtml = '';
     if (!isDual && showStatusBar) {
       headerStatusHtml = `
@@ -1114,7 +1366,7 @@ class ShutterCard extends HTMLElement {
       `;
     }
 
-    // Статус-бар
+    // ─── Status Bar ──────────────────────────────────────────────────────
     let statusBarHtml = '';
     if (showPosition) {
       if (!isDual) {
@@ -1143,6 +1395,7 @@ class ShutterCard extends HTMLElement {
       }
     }
 
+    // ─── Финальный HTML ──────────────────────────────────────────────────
     const html = `
       <style>${getShutterCSS(haTheme)}</style>
       <div class="card ${dualClasses} ${singleClasses}" style="${customCss}">
@@ -1160,6 +1413,7 @@ class ShutterCard extends HTMLElement {
 
           <div class="shutter-layout">
             ${controlsTopHtml}
+            ${tiltControlsHtml}
 
             <div class="shutter-row">
               ${controlsLeftHtmlSingle || leftControlsHtml}
@@ -1200,29 +1454,37 @@ class ShutterCard extends HTMLElement {
     this._initialized = false;
   }
 
+  // ─── Update ─────────────────────────────────────────────────────────────
   _update() {
     if (!this._initialized || !this._hass) return;
     const cfg = this._config;
     const isDual = cfg.mode === 'dual';
     const theme = HA_THEMES[this._haTheme] || HA_THEMES.dark;
+    const tiltEnabled = cfg.show_tilt_visual !== false;
     
     if (!this._isDragging) {
       if (isDual) {
         const newLeftPos = this._getPosition(cfg.left_entity_id);
         const newRightPos = this._getPosition(cfg.right_entity_id);
+        const newLeftTilt = this._getTilt(cfg.tilt_entity_left || cfg.left_entity_id);
+        const newRightTilt = this._getTilt(cfg.tilt_entity_right || cfg.right_entity_id);
         
-        if (newLeftPos !== this._leftPos) {
+        const effectiveLeftTilt = tiltEnabled ? newLeftTilt : 50;
+        const effectiveRightTilt = tiltEnabled ? newRightTilt : 50;
+        
+        if (newLeftPos !== this._leftPos || effectiveLeftTilt !== this._leftTilt) {
           this._leftPos = newLeftPos;
-          this._updateOverlay('left', newLeftPos, cfg.left_color_blind);
+          this._leftTilt = effectiveLeftTilt;
+          this._updateOverlay('left', newLeftPos, effectiveLeftTilt, cfg.left_color_blind);
           this._updateProgressBar('left', newLeftPos);
         }
-        if (newRightPos !== this._rightPos) {
+        if (newRightPos !== this._rightPos || effectiveRightTilt !== this._rightTilt) {
           this._rightPos = newRightPos;
-          this._updateOverlay('right', newRightPos, cfg.right_color_blind);
+          this._rightTilt = effectiveRightTilt;
+          this._updateOverlay('right', newRightPos, effectiveRightTilt, cfg.right_color_blind);
           this._updateProgressBar('right', newRightPos);
         }
         
-        // Обновляем статус-бар для dual
         const statusDual = this.shadowRoot?.querySelector('.status-dual');
         if (statusDual && isDual) {
           const leftState = this._state(cfg.left_entity_id);
@@ -1238,7 +1500,6 @@ class ShutterCard extends HTMLElement {
           }
         }
         
-        // Обновляем статус в шапке для dual
         if (cfg.show_status !== false) {
           const headerDual = this.shadowRoot?.querySelector('.header-right > div:last-child');
           if (headerDual && isDual) {
@@ -1254,21 +1515,21 @@ class ShutterCard extends HTMLElement {
           }
         }
       } else {
-        // SINGLE MODE
         const newPos = this._getPosition(cfg.entity_id);
+        const newTilt = this._getTilt(cfg.tilt_entity_id || cfg.entity_id);
         const state = this._state(cfg.entity_id);
         
-        // Обновляем позицию, если изменилась
-        if (newPos !== this._leftPos) {
+        const effectiveTilt = tiltEnabled ? newTilt : 50;
+        
+        if (newPos !== this._leftPos || effectiveTilt !== this._leftTilt) {
           this._leftPos = newPos;
-          this._updateOverlay('single', newPos, cfg.color_blind);
+          this._leftTilt = effectiveTilt;
+          this._updateOverlay('single', newPos, effectiveTilt, cfg.color_blind);
           this._updateProgressBar('single', newPos);
         }
         
-        // Всегда получаем актуальный статус
         const status = this._getStatusText(this._leftPos, state);
         
-        // Всегда обновляем статус в шапке
         if (cfg.show_status !== false) {
           const headerStatus = this.shadowRoot?.querySelector('.header-status');
           if (headerStatus) {
@@ -1292,7 +1553,6 @@ class ShutterCard extends HTMLElement {
           }
         }
         
-        // Всегда обновляем позицию в статус-баре
         const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
         if (statusLeft) {
           statusLeft.textContent = `${Math.round(this._leftPos)}%`;
@@ -1301,7 +1561,7 @@ class ShutterCard extends HTMLElement {
       }
     }
     
-    // Обновляем время на оверлее
+    // Обновляем таймстамп
     const timestamp = this.shadowRoot?.querySelector('.timestamp');
     if (timestamp) {
       const now = new Date();
@@ -1344,13 +1604,60 @@ class ShutterCard extends HTMLElement {
     this._refreshCamera();
   }
 
+  // ─── Биндинг событий ──────────────────────────────────────────────────
   _bindEvents() {
     const sr = this.shadowRoot;
     const cfg = this._config;
     const isDual = cfg.mode === 'dual';
+    const tiltEnabled = cfg.show_tilt_visual !== false;
+
+    const tiltBtns = sr?.querySelectorAll('.tilt-btn');
+    tiltBtns?.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (!tiltEnabled) return;
+        const side = btn.dataset.side;
+        const tiltAction = btn.dataset.tilt;
+        let entityId;
+        let currentTilt;
+        
+        if (isDual) {
+          if (side === 'left') {
+            entityId = cfg.tilt_entity_left || cfg.left_entity_id;
+            currentTilt = this._leftTilt;
+          } else {
+            entityId = cfg.tilt_entity_right || cfg.right_entity_id;
+            currentTilt = this._rightTilt;
+          }
+        } else {
+          entityId = cfg.tilt_entity_id || cfg.entity_id;
+          currentTilt = this._leftTilt;
+        }
+        
+        if (!entityId || !this._hass) return;
+        
+        let newTilt = currentTilt;
+        if (tiltAction === 'up') newTilt = Math.min(100, currentTilt + 10);
+        else if (tiltAction === 'down') newTilt = Math.max(0, currentTilt - 10);
+        else if (tiltAction === 'reset') newTilt = 50;
+        
+        this._callTilt(entityId, newTilt);
+        
+        if (isDual) {
+          if (side === 'left') {
+            this._leftTilt = newTilt;
+            this._updateOverlay('left', this._leftPos, newTilt, cfg.left_color_blind);
+          } else {
+            this._rightTilt = newTilt;
+            this._updateOverlay('right', this._rightPos, newTilt, cfg.right_color_blind);
+          }
+        } else {
+          this._leftTilt = newTilt;
+          this._updateOverlay('single', this._leftPos, newTilt, cfg.color_blind);
+        }
+      });
+    });
 
     if (isDual) {
-      // Кнопки для dual mode
       const controls = sr?.querySelectorAll('.controls-left .control-btn, .controls-right .control-btn');
       controls?.forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1359,13 +1666,11 @@ class ShutterCard extends HTMLElement {
           const entityId = side === 'left' ? cfg.left_entity_id : cfg.right_entity_id;
           if (!entityId || !this._hass) return;
           
-          // Показываем анимацию движения
           this._setMoving(true);
           
           const service = action === 'open' ? 'open_cover' : action === 'stop' ? 'stop_cover' : 'close_cover';
           this._hass.callService('cover', service, { entity_id: entityId });
           
-          // Эмуляция изменения позиции для режима без ОС
           if (cfg.no_feedback) {
             setTimeout(() => {
               let newPos = this._leftPos;
@@ -1374,7 +1679,7 @@ class ShutterCard extends HTMLElement {
                 else if (action === 'close') newPos = 0;
                 else if (action === 'stop') newPos = this._leftPos;
                 this._leftPos = newPos;
-                this._updateOverlay('left', newPos, cfg.left_color_blind);
+                this._updateOverlay('left', newPos, this._leftTilt, cfg.left_color_blind);
                 this._updateProgressBar('left', newPos);
                 this._savePosition(cfg.left_entity_id, newPos);
               } else {
@@ -1382,7 +1687,7 @@ class ShutterCard extends HTMLElement {
                 else if (action === 'close') newPos = 0;
                 else if (action === 'stop') newPos = this._rightPos;
                 this._rightPos = newPos;
-                this._updateOverlay('right', newPos, cfg.right_color_blind);
+                this._updateOverlay('right', newPos, this._rightTilt, cfg.right_color_blind);
                 this._updateProgressBar('right', newPos);
                 this._savePosition(cfg.right_entity_id, newPos);
               }
@@ -1390,18 +1695,17 @@ class ShutterCard extends HTMLElement {
               this._setMoving(false);
             }, 300);
           } else {
-            // Стандартный режим - обновляем из состояния
             setTimeout(() => {
               this._setMoving(false);
               if (side === 'left') {
                 const newPos = this._getPosition(cfg.left_entity_id);
                 this._leftPos = newPos;
-                this._updateOverlay('left', newPos, cfg.left_color_blind);
+                this._updateOverlay('left', newPos, this._leftTilt, cfg.left_color_blind);
                 this._updateProgressBar('left', newPos);
               } else {
                 const newPos = this._getPosition(cfg.right_entity_id);
                 this._rightPos = newPos;
-                this._updateOverlay('right', newPos, cfg.right_color_blind);
+                this._updateOverlay('right', newPos, this._rightTilt, cfg.right_color_blind);
                 this._updateProgressBar('right', newPos);
               }
             }, 300);
@@ -1409,22 +1713,20 @@ class ShutterCard extends HTMLElement {
         });
       });
 
-      // Drag для dual mode
       const halves = sr?.querySelectorAll('.shutter-half');
       halves?.forEach(half => {
         const side = half.dataset.side;
         if (!side || side === 'single') return;
         half.addEventListener('mousedown', (e) => {
-          if (e.target.closest('.control-btn')) return;
+          if (e.target.closest('.control-btn') || e.target.closest('.tilt-btn')) return;
           this._onDragStart(e, side);
         });
         half.addEventListener('touchstart', (e) => {
-          if (e.target.closest('.control-btn')) return;
+          if (e.target.closest('.control-btn') || e.target.closest('.tilt-btn')) return;
           this._onDragStart(e, side);
         }, { passive: false });
       });
     } else {
-      // Single mode controls
       const controls = sr?.querySelector('.controls');
       if (controls) {
         controls.replaceWith(controls.cloneNode(true));
@@ -1442,12 +1744,9 @@ class ShutterCard extends HTMLElement {
             else if (id === 'btn-close') { service = 'close_cover'; action = 'close'; }
             else return;
             
-            // Показываем анимацию движения
             this._setMoving(true);
-            
             this._hass.callService('cover', service, { entity_id: cfg.entity_id });
             
-            // Эмуляция изменения позиции для режима без ОС
             if (cfg.no_feedback) {
               setTimeout(() => {
                 let newPos = this._leftPos;
@@ -1456,11 +1755,10 @@ class ShutterCard extends HTMLElement {
                 else if (action === 'stop') newPos = this._leftPos;
                 
                 this._leftPos = newPos;
-                this._updateOverlay('single', newPos, cfg.color_blind);
+                this._updateOverlay('single', newPos, this._leftTilt, cfg.color_blind);
                 this._updateProgressBar('single', newPos);
                 this._savePosition(cfg.entity_id, newPos);
                 
-                // Обновляем статус в шапке
                 if (cfg.show_status !== false) {
                   const headerStatus = this.shadowRoot?.querySelector('.header-status');
                   if (headerStatus) {
@@ -1479,7 +1777,6 @@ class ShutterCard extends HTMLElement {
                     if (textNode) textNode.textContent = status.text;
                   }
                 }
-                // Обновляем позицию в статус-баре
                 const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
                 if (statusLeft) {
                   const state = this._state(cfg.entity_id);
@@ -1491,15 +1788,13 @@ class ShutterCard extends HTMLElement {
                 this._setMoving(false);
               }, 300);
             } else {
-              // Стандартный режим - обновляем из состояния
               setTimeout(() => {
                 this._setMoving(false);
                 const newPos = this._getPosition(cfg.entity_id);
                 this._leftPos = newPos;
-                this._updateOverlay('single', newPos, cfg.color_blind);
+                this._updateOverlay('single', newPos, this._leftTilt, cfg.color_blind);
                 this._updateProgressBar('single', newPos);
                 
-                // Обновляем статус в шапке
                 if (cfg.show_status !== false) {
                   const headerStatus = this.shadowRoot?.querySelector('.header-status');
                   if (headerStatus) {
@@ -1518,7 +1813,6 @@ class ShutterCard extends HTMLElement {
                     if (textNode) textNode.textContent = status.text;
                   }
                 }
-                // Обновляем позицию в статус-баре
                 const statusLeft = this.shadowRoot?.querySelector('.status-left .state');
                 if (statusLeft) {
                   const state = this._state(cfg.entity_id);
@@ -1532,11 +1826,10 @@ class ShutterCard extends HTMLElement {
         }
       }
 
-      // Drag для single mode
       const cameraSection = sr?.querySelector('#camera-section');
       if (cameraSection && cfg.camera_entity) {
         cameraSection.addEventListener('mousedown', (e) => {
-          if (e.target.closest('.control-btn')) return;
+          if (e.target.closest('.control-btn') || e.target.closest('.tilt-btn')) return;
           if (!cfg.entity_id || !this._hass) return;
           const event = e.touches ? e.touches[0] : e;
           this._isDragging = true;
@@ -1547,7 +1840,7 @@ class ShutterCard extends HTMLElement {
           e.preventDefault();
         });
         cameraSection.addEventListener('touchstart', (e) => {
-          if (e.target.closest('.control-btn')) return;
+          if (e.target.closest('.control-btn') || e.target.closest('.tilt-btn')) return;
           if (!cfg.entity_id || !this._hass) return;
           const touch = e.touches[0];
           this._isDragging = true;
@@ -1568,14 +1861,13 @@ class ShutterCard extends HTMLElement {
 }
 
 // ─── EDITOR ──────────────────────────────────────────────────────────────
-// (Editor код сохранен из предыдущей версии - для краткости опущен)
 class ShutterCardEditor extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this._config = { ...SHUTTER_DEFAULT_CONFIG };
     this._hass = null;
-    this._open = { lang: true, title: true, entities: true, camera: true, overlay: true, colors: false, bg: true, display: true, advanced: false };
+    this._open = { lang: true, title: true, entities: true, camera: true, overlay: true, colors: false, bg: true, display: true, advanced: false, tilt: false };
     this._picker = null;
     this._updating = false;
   }
@@ -1702,6 +1994,8 @@ class ShutterCardEditor extends HTMLElement {
     const memoryType = cfg.memory_type || 'localstorage';
     const showProgressBar = cfg.show_progress_bar !== false;
     const progressStyle = cfg.progress_bar_style || 'gradient';
+    const showTiltControls = cfg.show_tilt_controls || false;
+    const showTiltVisual = cfg.show_tilt_visual !== false;
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -1886,11 +2180,24 @@ class ShutterCardEditor extends HTMLElement {
         }
         .style-btn:hover { border-color:var(--primary-color); }
         .style-btn.on { border-color:var(--primary-color);background:rgba(3,169,244,.08);color:var(--primary-color); }
+        .tilt-entity-row {
+          margin-top:8px;
+          padding:8px 12px;
+          background:var(--secondary-background-color);
+          border-radius:6px;
+          border-left:3px solid var(--primary-color);
+        }
+        .tilt-entity-row .row {
+          margin-bottom:8px;
+        }
+        .tilt-entity-row .row:last-child {
+          margin-bottom:0;
+        }
       </style>
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">v1.1.0 — Шкала прогресса + Режим без ОС + Мобильная адаптация + Эмуляция</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.2 — Исправлен сброс tilt и обновление ламелей</span>
         </div>
 
         <!-- Language -->
@@ -1988,6 +2295,11 @@ class ShutterCardEditor extends HTMLElement {
                   </span>
                 </div>
               </div>
+              <div class="tilt-entity-row">
+                <div style="font-size:11px;font-weight:600;color:var(--secondary-text-color);margin-bottom:6px;">↕ Наклон ламелей</div>
+                ${this._entityField('tilt_entity_id', 'Сущность наклона (опционально)', 'cover')}
+                <div style="font-size:10px;color:var(--secondary-text-color);margin-top:2px;">Если не указана, используется основная сущность</div>
+              </div>
             </div>
 
             <div class="dual-entities" id="dual-entities">
@@ -2011,6 +2323,9 @@ class ShutterCardEditor extends HTMLElement {
                       </span>
                     </div>
                   </div>
+                  <div class="tilt-entity-row">
+                    ${this._entityField('tilt_entity_left', 'Наклон (левая)', 'cover')}
+                  </div>
                 </div>
                 <div>
                   ${this._entityField('right_entity_id', 'Сущность (правая)', 'cover')}
@@ -2031,6 +2346,9 @@ class ShutterCardEditor extends HTMLElement {
                       </span>
                     </div>
                   </div>
+                  <div class="tilt-entity-row">
+                    ${this._entityField('tilt_entity_right', 'Наклон (правая)', 'cover')}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2039,6 +2357,18 @@ class ShutterCardEditor extends HTMLElement {
             ${this._entityField('camera_entity', 'Камера', 'camera')}
             ${this._entityField('motion_entity', 'Датчик движения', 'binary_sensor')}
             ${this._entityField('recording_entity', 'Статус записи', 'binary_sensor')}
+          </div>
+        </div>
+
+        <!-- Tilt Settings -->
+        <div class="acc-wrap">
+          <div class="acc-head" id="head-tilt">
+            <span>↕ Наклон ламелей</span>
+            <span class="acc-arrow" id="arrow-tilt">${this._open.tilt ? '▾' : '▸'}</span>
+          </div>
+          <div class="acc-body" id="body-tilt" style="display:${this._open.tilt ? 'block' : 'none'}">
+            ${this._toggleSwitch('show_tilt_visual', 'Включить наклон ламелей', 'Выключено — ламели всегда в положении 50% (закрыты)')}
+            ${this._toggleSwitch('show_tilt_controls', 'Показать кнопки наклона', 'Кнопки ↕ ⟳ под шторкой (только если наклон включён)')}
           </div>
         </div>
 
@@ -2137,7 +2467,6 @@ class ShutterCardEditor extends HTMLElement {
           </div>
           <div class="acc-body" id="body-advanced" style="display:${this._open.advanced ? 'block' : 'none'}">
             
-            <!-- Шкала прогресса -->
             <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📊 Шкала прогресса</div>
             ${this._toggleSwitch('show_progress_bar', 'Показать шкалу прогресса', 'Отображать анимированную шкалу под шторкой')}
             
@@ -2149,7 +2478,6 @@ class ShutterCardEditor extends HTMLElement {
 
             <div style="height:1px;background:var(--divider-color);margin:12px 0;"></div>
 
-            <!-- Режим без обратной связи -->
             <div style="font-size:12px;font-weight:700;color:var(--secondary-text-color);margin-bottom:6px;">📡 Режим без обратной связи</div>
             ${this._toggleSwitch('no_feedback', 'Включить режим без ОС', 'Для устройств без датчика положения')}
             
@@ -2243,7 +2571,7 @@ class ShutterCardEditor extends HTMLElement {
   _bindEvents() {
     const sr = this.shadowRoot;
 
-    ['lang', 'title', 'entities', 'camera', 'overlay', 'display', 'colors', 'bg', 'advanced'].forEach(id => {
+    ['lang', 'title', 'entities', 'camera', 'overlay', 'display', 'colors', 'bg', 'advanced', 'tilt'].forEach(id => {
       const hdr = sr.getElementById('head-' + id);
       if (hdr) hdr.addEventListener('click', () => this._toggleSection(id));
     });
@@ -2316,7 +2644,6 @@ class ShutterCardEditor extends HTMLElement {
     wireText('inp-subtitle', 'subtitle');
     wireText('inp-owner', 'owner_name');
 
-    // RGBA color pickers
     const bindColorPicker = (pickerId, textId, alphaId, alphaLabelId, configKey) => {
       const picker = sr.getElementById(pickerId);
       const text = sr.getElementById(textId);
@@ -2521,7 +2848,7 @@ class ShutterCardEditor extends HTMLElement {
       tog.addEventListener('change', () => {
         this._config[tog.dataset.key] = tog.checked;
         this._fire();
-        if (tog.dataset.key === 'no_feedback') {
+        if (tog.dataset.key === 'no_feedback' || tog.dataset.key === 'show_tilt_controls' || tog.dataset.key === 'show_tilt_visual') {
           this._render();
         }
         if (tog.dataset.key === 'show_progress_bar') {
@@ -2550,12 +2877,12 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'shutter-card',
   name: 'Shutter Card',
-  description: 'Управление жалюзи с детализированной шторкой, шкалой прогресса и режимом без ОС',
+  description: 'Управление жалюзи с 24 ламелями, появляющимися сверху вниз',
   preview: true,
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.1.0 %c Шкала прогресса + Режим без ОС + Мобильная адаптация + Эмуляция!',
+  '%c 🪟 Shutter Card %c v1.2.2 %c Исправлен сброс tilt и обновление ламелей при перезагрузке!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'

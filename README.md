@@ -1,7 +1,7 @@
 # HA Shutter Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-![version](https://img.shields.io/badge/version-1.1.0-blue)
+![version](https://img.shields.io/badge/version-1.2.2-blue)
 ![HA](https://img.shields.io/badge/Home%20Assistant-2023.1+-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -121,6 +121,18 @@ input_number:
 ![Редактор HA Shutter Card](images/preview3.png)
 
 
+---
+
+## 🎯 Новые возможности v1.2.2
+###  🔄 Полноценное управление наклоном ламелей (Tilt)
+- Управление наклоном — теперь можно поворачивать ламели как у настоящих жалюзи
+- Кнопки управления — ↕ (поворот вверх/вниз) и ⟳ (сброс в 50%)
+- Двойной режим — независимое управление наклоном для левой и правой шторки
+- Отключение наклона — опция show_tilt_visual: false фиксирует ламели в положении 50%
+
+---
+
+![Редактор HA Shutter Card](images/preview4.png)
 
 ---
 
@@ -218,7 +230,6 @@ color_blind: "rgba(26, 26, 46, 0.7)"
 
 ### 📝 Приоритет для добавления в следующие версии:
 
-- Наклон ламелей (tilt) — важно для жалюзи
 - Защита от конфликтов — безопасность
 - Анимация/иконки статуса — визуальное улучшение
 - Маркизы — поддержка дополнительных устройств
