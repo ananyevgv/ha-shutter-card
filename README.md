@@ -154,7 +154,7 @@ input_number:
 
 **Шаг 1:** Добавьте пользовательский репозиторий в HACS:
 
-[![Открыть репозиторий в HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=NagandA&repository=ha-shutter-card&category=plugin)
+[![Открыть репозиторий в HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=NagibinA&repository=ha-shutter-card&category=plugin)
 
 > Если кнопка не работает, добавьте вручную:
 > **HACS → Панель → ⋮ → Пользовательские репозитории**
