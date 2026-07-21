@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.2.2 — Исправлено: сброс tilt при перезагрузке карточки + корректное обновление ламелей
+// v1.2.4 — Исправлено: наклон ламелей как в документации HA
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
@@ -223,7 +223,6 @@ function getShutterCSS(haTheme) {
 .tilt-controls .tilt-btn .ico{font-size:14px;line-height:1.2}
 .tilt-controls .tilt-btn.tilt-up:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
 .tilt-controls .tilt-btn.tilt-down:hover{border-color:var(--cv-accent,#00d4ff);color:var(--cv-accent,#00d4ff)}
-.tilt-controls .tilt-btn.tilt-reset:hover{border-color:#f59e0b;color:#f59e0b}
 
 /* ─── Offline / Loading ────────────────────────────────────────────────── */
 .camera-section .camera-offline{display:flex;align-items:center;justify-content:center;height:100%;
@@ -412,8 +411,8 @@ class ShutterCard extends HTMLElement {
     this._container = null;
     this._leftPos = 0;
     this._rightPos = 0;
-    this._leftTilt = 50;
-    this._rightTilt = 50;
+    this._leftTilt = 0;
+    this._rightTilt = 0;
     this._haTheme = 'dark';
     this._isDragging = false;
     this._dragStartY = 0;
@@ -518,9 +517,8 @@ class ShutterCard extends HTMLElement {
   setConfig(config) {
     this._config = { ...SHUTTER_DEFAULT_CONFIG, ...config };
     this._haTheme = this._getHATheme();
-    // ✅ Сбрасываем tilt при загрузке конфигурации
-    this._leftTilt = 50;
-    this._rightTilt = 50;
+    this._leftTilt = 0;
+    this._rightTilt = 0;
     this._initialized = false;
     this._render();
   }
@@ -617,7 +615,7 @@ class ShutterCard extends HTMLElement {
 
   // ─── Получение позиции и наклона ─────────────────────────────────────
   _getTilt(entityId) {
-    if (!entityId) return 50;
+    if (!entityId) return 0;
     const state = this._state(entityId);
     if (state) {
       const tilt = state.attributes?.current_tilt_position;
@@ -625,7 +623,7 @@ class ShutterCard extends HTMLElement {
         return Math.max(0, Math.min(100, tilt));
       }
     }
-    return 50;
+    return 0;
   }
 
   _getPosition(entityId) {
@@ -742,36 +740,28 @@ class ShutterCard extends HTMLElement {
   }
 
   // ─── Генерация ламелей (24 шт) ──────────────────────────────────────
-  // position влияет на количество видимых ламелей (сверху вниз)
-  // tilt влияет на ширину/угол каждой ламели
   _generateSlats(pos, tilt, color, isDark) {
     let slats = '';
     const numSlats = 24;
     const baseColor = color || (isDark ? 'rgba(60, 60, 80, 0.9)' : 'rgba(210, 210, 220, 0.9)');
     
     const p = (pos !== undefined && pos !== null) ? Math.max(0, Math.min(100, pos)) : 0;
-    const t = (tilt !== undefined && tilt !== null) ? Math.max(0, Math.min(100, tilt)) : 50;
+    const t = (tilt !== undefined && tilt !== null) ? Math.max(0, Math.min(100, tilt)) : 0;
     
-    // Количество видимых ламелей (зависит от position)
-    // position=0% → 24 ламели, position=100% → 0 ламелей
     const visibleCount = Math.round(numSlats * (1 - p / 100));
     
-    // Наклон: при 50 — широкие, при 0 или 100 — узкие
-    const distanceFromCenter = Math.abs(t - 50) / 50;
-    const heightFactor = 1.0 - 0.95 * distanceFromCenter;
-    const angleDeg = ((t - 50) / 50) * 90;
+    const normalizedTilt = t / 100;
+    const heightFactor = 1.0 - 0.9 * normalizedTilt;
+    const angleDeg = normalizedTilt * 90;
     
-    // Высота каждой ламели
     const slatHeight = 100 / numSlats;
-    const gap = (1 - heightFactor) * slatHeight;
+    const effectiveHeight = heightFactor * slatHeight;
+    const offset = (slatHeight - effectiveHeight) / 2;
     
     for (let i = 0; i < numSlats; i++) {
-      // Ламели появляются сверху: i=0 — самая верхняя
-      if (i >= visibleCount) {
-        continue;
-      }
+      if (i >= visibleCount) continue;
       
-      const y = i * slatHeight + gap / 2;
+      const y = i * slatHeight + offset;
       const isEven = i % 2 === 0;
       const slatAngle = isEven ? angleDeg : -angleDeg * 0.6;
       const brightness = 0.7 + 0.3 * (isEven ? 1 : 0.85);
@@ -779,7 +769,7 @@ class ShutterCard extends HTMLElement {
       
       slats += `<div class="slat" style="
         top:${y}%;
-        height:${heightFactor * slatHeight}%;
+        height:${effectiveHeight}%;
         transform: rotateX(${slatAngle}deg);
         background: ${slatColor};
         opacity: 1;
@@ -796,31 +786,33 @@ class ShutterCard extends HTMLElement {
     const overlay = this.shadowRoot?.querySelector(`.shutter-half.${side} .blind-overlay`);
     if (!overlay) return;
     
+    // Полностью пересоздаем содержимое overlay
+    overlay.innerHTML = '';
     overlay.style.transform = 'none';
     overlay.style.background = 'transparent';
     
-    const slats = overlay.querySelectorAll('.slat');
-    if (slats.length === 0) return;
-    
-    // ✅ Используем переданные значения
     const p = (pos !== undefined && pos !== null) ? Math.max(0, Math.min(100, pos)) : 0;
-    const t = (tilt !== undefined && tilt !== null) ? Math.max(0, Math.min(100, tilt)) : 50;
+    const t = (tilt !== undefined && tilt !== null) ? Math.max(0, Math.min(100, tilt)) : 0;
     const numSlats = 24;
-    const baseColor = blindColor || (this._haTheme === 'dark' ? 'rgba(60, 60, 80, 0.9)' : 'rgba(210, 210, 220, 0.9)');
+    const isDark = this._haTheme === 'dark';
+    const baseColor = blindColor || (isDark ? 'rgba(60, 60, 80, 0.9)' : 'rgba(210, 210, 220, 0.9)');
     
-    // ✅ Количество видимых ламелей пересчитывается всегда
     const visibleCount = Math.round(numSlats * (1 - p / 100));
     
-    // Параметры наклона
-    const distanceFromCenter = Math.abs(t - 50) / 50;
-    const heightFactor = 1.0 - 0.95 * distanceFromCenter;
-    const angleDeg = ((t - 50) / 50) * 90;
+    const normalizedTilt = t / 100;
+    const heightFactor = 1.0 - 0.9 * normalizedTilt;
+    const angleDeg = normalizedTilt * 90;
     const slatHeight = 100 / numSlats;
-    const gap = (1 - heightFactor) * slatHeight;
+    const effectiveHeight = heightFactor * slatHeight;
+    const offset = (slatHeight - effectiveHeight) / 2;
     
-    slats.forEach((slat, i) => {
+    // Создаем все ламели заново
+    for (let i = 0; i < numSlats; i++) {
+      const slat = document.createElement('div');
+      slat.className = 'slat';
+      
       if (i < visibleCount) {
-        const y = i * slatHeight + gap / 2;
+        const y = i * slatHeight + offset;
         const isEven = i % 2 === 0;
         const slatAngle = isEven ? angleDeg : -angleDeg * 0.6;
         const brightness = 0.7 + 0.3 * (isEven ? 1 : 0.85);
@@ -832,7 +824,7 @@ class ShutterCard extends HTMLElement {
           left: 2%;
           right: 2%;
           top: ${y}%;
-          height: ${heightFactor * slatHeight}%;
+          height: ${effectiveHeight}%;
           transform: rotateX(${slatAngle}deg);
           transform-origin: center center;
           background: ${slatColor};
@@ -843,14 +835,14 @@ class ShutterCard extends HTMLElement {
           transition: transform 0.5s ease, top 0.5s ease, opacity 0.5s ease;
         `;
       } else {
-        const y = i * slatHeight + gap / 2;
+        const y = i * slatHeight + offset;
         slat.style.cssText = `
           display: block !important;
           position: absolute;
           left: 2%;
           right: 2%;
           top: ${y}%;
-          height: ${heightFactor * slatHeight}%;
+          height: ${effectiveHeight}%;
           transform: rotateX(0deg);
           transform-origin: center center;
           background: transparent;
@@ -861,7 +853,9 @@ class ShutterCard extends HTMLElement {
           transition: opacity 0.5s ease, top 0.5s ease;
         `;
       }
-    });
+      
+      overlay.appendChild(slat);
+    }
   }
 
   _updateProgressBar(side, pos) {
@@ -1009,10 +1003,9 @@ class ShutterCard extends HTMLElement {
     const bgGrad = shutterPresetGradient(cfg.background_preset, cfg.bg_color1, cfg.bg_color2, cfg.bg_alpha, haTheme);
 
     let leftStatus, rightStatus, singleStatus;
-    let leftTilt = 50, rightTilt = 50;
+    let leftTilt = 0, rightTilt = 0;
     
     if (isDual) {
-      // ✅ Всегда получаем свежие позиции
       const leftPos = this._getPosition(cfg.left_entity_id);
       const rightPos = this._getPosition(cfg.right_entity_id);
       this._leftPos = leftPos;
@@ -1022,8 +1015,8 @@ class ShutterCard extends HTMLElement {
       rightTilt = this._getTilt(cfg.tilt_entity_right || cfg.right_entity_id);
       
       if (!tiltEnabled) {
-        leftTilt = 50;
-        rightTilt = 50;
+        leftTilt = 0;
+        rightTilt = 0;
       }
       
       this._leftTilt = leftTilt;
@@ -1034,12 +1027,11 @@ class ShutterCard extends HTMLElement {
       leftStatus = this._getStatusText(leftPos, leftState);
       rightStatus = this._getStatusText(rightPos, rightState);
     } else {
-      // ✅ Всегда получаем свежую позицию
       const pos = this._getPosition(cfg.entity_id);
       this._leftPos = pos;
       
       const tilt = this._getTilt(cfg.tilt_entity_id || cfg.entity_id);
-      this._leftTilt = tiltEnabled ? tilt : 50;
+      this._leftTilt = tiltEnabled ? tilt : 0;
       
       const state = this._state(cfg.entity_id);
       singleStatus = this._getStatusText(pos, state);
@@ -1102,13 +1094,11 @@ class ShutterCard extends HTMLElement {
           <div class="tilt-controls" style="display:flex;gap:4px;justify-content:space-between;width:100%;">
             <div style="display:flex;gap:4px;">
               <button class="tilt-btn tilt-up" data-side="left" data-tilt="up" title="Наклон левой вверх">↕</button>
-              <button class="tilt-btn tilt-reset" data-side="left" data-tilt="reset" title="Сброс левой">⟳</button>
               <button class="tilt-btn tilt-down" data-side="left" data-tilt="down" title="Наклон левой вниз">↕</button>
               <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">Л</span>
             </div>
             <div style="display:flex;gap:4px;">
               <button class="tilt-btn tilt-up" data-side="right" data-tilt="up" title="Наклон правой вверх">↕</button>
-              <button class="tilt-btn tilt-reset" data-side="right" data-tilt="reset" title="Сброс правой">⟳</button>
               <button class="tilt-btn tilt-down" data-side="right" data-tilt="down" title="Наклон правой вниз">↕</button>
               <span style="font-size:8px;color:${theme.text_muted};display:flex;align-items:center;padding:0 4px;">П</span>
             </div>
@@ -1118,7 +1108,6 @@ class ShutterCard extends HTMLElement {
         tiltControlsHtml = `
           <div class="tilt-controls" style="display:flex;gap:4px;justify-content:center;width:100%;">
             <button class="tilt-btn tilt-up" data-side="single" data-tilt="up" title="Наклон вверх">↕</button>
-            <button class="tilt-btn tilt-reset" data-side="single" data-tilt="reset" title="Сброс наклона">⟳</button>
             <button class="tilt-btn tilt-down" data-side="single" data-tilt="down" title="Наклон вниз">↕</button>
           </div>
         `;
@@ -1132,10 +1121,9 @@ class ShutterCard extends HTMLElement {
         const leftColor = cfg.left_color_blind || 'rgba(26,26,46,0.85)';
         const rightColor = cfg.right_color_blind || 'rgba(26,26,46,0.85)';
         
-        const effectiveLeftTilt = tiltEnabled ? this._leftTilt : 50;
-        const effectiveRightTilt = tiltEnabled ? this._rightTilt : 50;
+        const effectiveLeftTilt = tiltEnabled ? this._leftTilt : 0;
+        const effectiveRightTilt = tiltEnabled ? this._rightTilt : 0;
         
-        // ✅ Используем свежие позиции из переменных
         const leftSlats = this._generateSlats(this._leftPos, effectiveLeftTilt, leftColor, isDark);
         const rightSlats = this._generateSlats(this._rightPos, effectiveRightTilt, rightColor, isDark);
         
@@ -1161,9 +1149,8 @@ class ShutterCard extends HTMLElement {
         `;
       } else {
         const singleColor = cfg.color_blind || 'rgba(26,26,46,0.85)';
-        const effectiveSingleTilt = tiltEnabled ? this._leftTilt : 50;
+        const effectiveSingleTilt = tiltEnabled ? this._leftTilt : 0;
         
-        // ✅ Используем свежую позицию из переменной
         const slats = this._generateSlats(this._leftPos, effectiveSingleTilt, singleColor, isDark);
         
         let bgImageHtml = '';
@@ -1469,8 +1456,8 @@ class ShutterCard extends HTMLElement {
         const newLeftTilt = this._getTilt(cfg.tilt_entity_left || cfg.left_entity_id);
         const newRightTilt = this._getTilt(cfg.tilt_entity_right || cfg.right_entity_id);
         
-        const effectiveLeftTilt = tiltEnabled ? newLeftTilt : 50;
-        const effectiveRightTilt = tiltEnabled ? newRightTilt : 50;
+        const effectiveLeftTilt = tiltEnabled ? newLeftTilt : 0;
+        const effectiveRightTilt = tiltEnabled ? newRightTilt : 0;
         
         if (newLeftPos !== this._leftPos || effectiveLeftTilt !== this._leftTilt) {
           this._leftPos = newLeftPos;
@@ -1519,7 +1506,7 @@ class ShutterCard extends HTMLElement {
         const newTilt = this._getTilt(cfg.tilt_entity_id || cfg.entity_id);
         const state = this._state(cfg.entity_id);
         
-        const effectiveTilt = tiltEnabled ? newTilt : 50;
+        const effectiveTilt = tiltEnabled ? newTilt : 0;
         
         if (newPos !== this._leftPos || effectiveTilt !== this._leftTilt) {
           this._leftPos = newPos;
@@ -1561,14 +1548,12 @@ class ShutterCard extends HTMLElement {
       }
     }
     
-    // Обновляем таймстамп
     const timestamp = this.shadowRoot?.querySelector('.timestamp');
     if (timestamp) {
       const now = new Date();
       timestamp.textContent = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
     }
     
-    // Обновляем статус движения и записи
     const motionState = this._state(cfg.motion_entity);
     const isMotion = motionState ? motionState.state === 'on' : false;
     const recordingState = this._state(cfg.recording_entity);
@@ -1638,7 +1623,6 @@ class ShutterCard extends HTMLElement {
         let newTilt = currentTilt;
         if (tiltAction === 'up') newTilt = Math.min(100, currentTilt + 10);
         else if (tiltAction === 'down') newTilt = Math.max(0, currentTilt - 10);
-        else if (tiltAction === 'reset') newTilt = 50;
         
         this._callTilt(entityId, newTilt);
         
@@ -2197,7 +2181,7 @@ class ShutterCardEditor extends HTMLElement {
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.2 — Исправлен сброс tilt и обновление ламелей</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.2.4 — Исправлено полное пересоздание ламелей при обновлении</span>
         </div>
 
         <!-- Language -->
@@ -2367,8 +2351,14 @@ class ShutterCardEditor extends HTMLElement {
             <span class="acc-arrow" id="arrow-tilt">${this._open.tilt ? '▾' : '▸'}</span>
           </div>
           <div class="acc-body" id="body-tilt" style="display:${this._open.tilt ? 'block' : 'none'}">
-            ${this._toggleSwitch('show_tilt_visual', 'Включить наклон ламелей', 'Выключено — ламели всегда в положении 50% (закрыты)')}
-            ${this._toggleSwitch('show_tilt_controls', 'Показать кнопки наклона', 'Кнопки ↕ ⟳ под шторкой (только если наклон включён)')}
+            <div style="font-size:11px;color:var(--secondary-text-color);margin-bottom:8px;padding:6px 10px;background:var(--secondary-background-color);border-radius:6px;border-left:3px solid var(--primary-color);">
+              <strong>Новая логика наклона:</strong><br>
+              0% = полностью закрыто (ламели плотно прилегают друг к другу)<br>
+              50% = половина открыто<br>
+              100% = полностью открыто (ламели повернуты ребром)
+            </div>
+            ${this._toggleSwitch('show_tilt_visual', 'Включить наклон ламелей', 'Выключено — ламели всегда в положении 0% (плотно закрыты)')}
+            ${this._toggleSwitch('show_tilt_controls', 'Показать кнопки наклона', 'Кнопки ↕ под шторкой (только если наклон включён)')}
           </div>
         </div>
 
@@ -2877,12 +2867,12 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'shutter-card',
   name: 'Shutter Card',
-  description: 'Управление жалюзи с 24 ламелями, появляющимися сверху вниз',
+  description: 'Управление жалюзи с 24 ламелями. Наклон: 0% = плотно прилегают, 100% = открыто',
   preview: true,
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.2.2 %c Исправлен сброс tilt и обновление ламелей при перезагрузке!',
+  '%c 🪟 Shutter Card %c v1.2.4 %c Исправлено полное пересоздание ламелей при обновлении!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
