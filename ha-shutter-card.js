@@ -2866,9 +2866,21 @@ customElements.define('shutter-card-editor', ShutterCardEditor);
 window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'shutter-card',
-  name: 'Shutter Card',
+  name: '🪟 Shutter Card',
   description: 'Управление жалюзи с 24 ламелями. Наклон: 0% = плотно прилегают, 100% = открыто',
   preview: true,
+  editable: true,
+  config: {
+    ...SHUTTER_DEFAULT_CONFIG,
+    entity_id: 'cover.kitchen_window_motor_1',
+    camera_entity: 'camera.kitchen_view',
+    color_blind: 'rgba(26, 26, 46, 0.85)',
+    controls_position: 'bottom',
+    show_progress_bar: true,
+    no_feedback: false,
+    show_tilt_controls: false,
+    show_tilt_visual: true,
+  }
 });
 
 console.info(
