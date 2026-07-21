@@ -1,7 +1,7 @@
 // ha-shutter-card.js
 // v1.2.4 — Исправлено: наклон ламелей как в документации HA
 
-import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
+import { SHUTTER_TRANSLATIONS } from './translations/index.js';
 
 // ─── Theme colors ──────────────────────────────────────────────────────
 const HA_THEMES = {
