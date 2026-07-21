@@ -132,6 +132,10 @@ input_number:
 
 ---
 
+![Редактор HA Shutter Card](images/preview4.png)
+
+---
+
 ## 🎯 Исправление v1.2.4
 ###  🔄 Линейное изменение наклона от 0% до 100% (Tilt)
 - Управление наклоном — теперь по документации Home Assistant
@@ -139,7 +143,7 @@ input_number:
 
 ---
 
-![Редактор HA Shutter Card](images/preview4.png)
+![Редактор HA Shutter Card](images/preview5.png)
 
 ---
 
