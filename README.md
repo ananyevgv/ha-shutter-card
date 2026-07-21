@@ -1,7 +1,7 @@
 # HA Shutter Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-![version](https://img.shields.io/badge/version-1.2.2-blue)
+![version](https://img.shields.io/badge/version-1.2.4-blue)
 ![HA](https://img.shields.io/badge/Home%20Assistant-2023.1+-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -133,6 +133,17 @@ input_number:
 ---
 
 ![Редактор HA Shutter Card](images/preview4.png)
+
+---
+
+## 🎯 Исправление v1.2.4
+###  🔄 Линейное изменение наклона от 0% до 100% (Tilt)
+- Управление наклоном — теперь по документации Home Assistant
+- Кнопки управления — ↕ (поворот вверх/вниз) а кнопка сброса (⟳) удалена
+
+---
+
+![Редактор HA Shutter Card](images/preview5.png)
 
 ---
 
