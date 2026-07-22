@@ -1,7 +1,7 @@
 # HA Shutter Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-![version](https://img.shields.io/badge/version-1.2.4-blue)
+![version](https://img.shields.io/badge/version-1.2.5-blue)
 ![HA](https://img.shields.io/badge/Home%20Assistant-2023.1+-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -147,6 +147,19 @@ input_number:
 
 ---
 
+
+## 🎯 Исправление v1.2.5
+###  🎉 Теперь карточка полностью локализована! 
+- Все жёстко закодированные строки заменены на вызовы this.t.XXX
+- Добавлены все 12 языков в формате JSON
+- Редактор полностью локализован
+- Исправлены все надписи в статус-баре (Левая/Правая)
+- Исправлен оверлей камеры (Движение/Запись)
+- Исправлены кнопки управления
+- Исправлены подписи tilt-кнопок
+- Добавлена поддержка параметров в переводах (например, {position})
+
+---
 
 ## 📦 Установка
 
