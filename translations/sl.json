@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Slovenščina",
+    "flag": "si"
+  },
+  "ui": {
+    "card": {
+      "title": "Rolete",
+      "subtitle": "Upravljanje",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "ODPIRANJE",
+      "closing": "ZAPIRANJE",
+      "stopped": "USTAVLJENO",
+      "open": "ODPRTO",
+      "closed": "ZAPRTO",
+      "moving": "Premikanje...",
+      "partial": "USTAVLJENO {position}%"
+    },
+    "buttons": {
+      "open": "Odpri",
+      "stop": "Ustavi",
+      "close": "Zapri"
+    },
+    "labels": {
+      "position": "Položaj",
+      "camera": "Kamera",
+      "live": "V ŽIVO",
+      "offline": "Offline",
+      "loading": "Nalaganje...",
+      "motion": "Gibanje",
+      "recording": "Snemanje",
+      "tilt": "Nagnjenost",
+      "left": "Leva",
+      "right": "Desna",
+      "no_feedback": "📡 Brez povratne informacije",
+      "memory": "💾",
+      "no_camera": "Brez kamere"
+    },
+    "greetings": {
+      "night": "🌙 Lahko noč",
+      "morning": "🌅 Dobro jutro",
+      "afternoon": "☀️ Dober dan",
+      "evening": "🌆 Dober večer"
+    },
+    "dual": {
+      "left": "Leva",
+      "right": "Desna"
+    },
+    "feedback": {
+      "no_feedback": "📡 Brez povratne informacije",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Nagni navzgor",
+      "down": "Nagni navzdol",
+      "info_0": "0% = popolnoma zaprto (lamelice tesno skupaj)",
+      "info_50": "50% = polodprto",
+      "info_100": "100% = popolnoma odprto (lamelice na robu)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Jezik",
+      "title": "📝 Naslov in tema",
+      "entities": "🔌 Entitete",
+      "tilt": "↕ Upravljanje nagnjenosti",
+      "camera": "📷 Kamera",
+      "overlay": "🎬 Prekrivanje",
+      "display": "👁 Prikaz",
+      "colors": "🎨 Barve",
+      "background": "🌈 Ozadje",
+      "advanced": "⚙️ Napredno"
+    },
+    "fields": {
+      "title": "Naslov kartice",
+      "subtitle": "Podnaslov",
+      "owner_name": "Ime lastnika",
+      "theme": "Tema",
+      "theme_auto": "🌓 Auto (sistem)",
+      "theme_dark": "🌙 Temna",
+      "theme_light": "☀️ Svetla",
+      "mode": "Način",
+      "mode_single": "Enojni",
+      "mode_single_sub": "Ena roleta",
+      "mode_dual": "Dvojni",
+      "mode_dual_sub": "Leva + Desna",
+      "entity": "Entiteta rolet",
+      "camera_entity": "Entiteta kamere",
+      "motion_entity": "Senzor gibanja",
+      "recording_entity": "Stanje snemanja",
+      "tilt_entity": "Entiteta nagnjenosti (neobvezno)",
+      "tilt_visual": "Omogoči vizualizacijo nagnjenosti",
+      "tilt_visual_desc": "Onemogočeno — lamelice vedno na 0% (popolnoma zaprto)",
+      "tilt_controls": "Pokaži gumbe za nagnjenost",
+      "tilt_controls_desc": "Gumbi ↕ pod roletami (samo če je nagnjenost omogočena)",
+      "camera_size": "Velikost kamere",
+      "camera_size_small": "Majhna",
+      "camera_size_medium": "Srednja",
+      "camera_size_large": "Velika",
+      "camera_show": "Pokaži kamero",
+      "camera_show_desc": "Prikaži kamero na kartici",
+      "refresh_interval": "Interval osveževanja",
+      "refresh_interval_desc": "Kako pogosto osvežiti sliko kamere (sek)",
+      "show_timestamp": "Pokaži časovni žig",
+      "show_motion": "Indikator gibanja",
+      "show_recording": "Indikator snemanja",
+      "controls_position": "Položaj kontrol",
+      "controls_bottom": "⬇️ Spodaj",
+      "controls_bottom_sub": "Vodoravno",
+      "controls_top": "⬆️ Zgoraj",
+      "controls_top_sub": "Vodoravno",
+      "controls_left": "⬅️ Levo",
+      "controls_left_sub": "Navpično",
+      "controls_right": "➡️ Desno",
+      "controls_right_sub": "Navpično",
+      "show_greeting": "Pokaži pozdrav",
+      "show_greeting_desc": "Prikaži pozdrav glede na čas dneva",
+      "show_position": "Pokaži položaj",
+      "show_controls": "Pokaži kontrole",
+      "show_status": "Pokaži stanje",
+      "invert_position": "🔄 Invertiraj položaj",
+      "invert_position_desc": "Invertiraj vrednost položaja (100% = zaprto)",
+      "shutter_color": "Barva rolet (RGBA)",
+      "shutter_color_left": "Barva rolet (leva)",
+      "shutter_color_right": "Barva rolet (desna)",
+      "opacity": "Prosojnost:",
+      "progress_bar": "Pokaži indikator napredka",
+      "progress_bar_desc": "Prikaži animirani indikator napredka pod roletami",
+      "progress_style": "Slog indikatorja napredka",
+      "progress_gradient": "🌈 Prehod",
+      "progress_solid": "⬛ Poln",
+      "no_feedback": "Omogoči način brez povratne informacije",
+      "no_feedback_desc": "Za naprave brez senzorja položaja",
+      "memory_type": "Metoda shranjevanja",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number za shranjevanje položaja",
+      "input_number_left": "Input number (leva)",
+      "input_number_right": "Input number (desna)",
+      "bg_image": "URL slike ozadja",
+      "bg_image_desc": "Prikazana kot ozadje pod roletami, samo ko je kamera izklopljena",
+      "bg_preset": "Prednastavitev prehoda",
+      "bg_alpha": "Prosojnost",
+      "bg_blur": "Zameglitev",
+      "bg_custom_color1": "Barva 1",
+      "bg_custom_color2": "Barva 2"
+    },
+    "colors": {
+      "accent": "Poudarjena barva",
+      "text": "Barva besedila",
+      "open": "Barva odprto",
+      "closed": "Barva zaprto",
+      "reset": "↩ Ponastavi barve"
+    },
+    "info": {
+      "dual_layout": "📌 V \"Dvojnem\" načinu so kontrole nameščene:\n⬅️ Levo — za levo roleto\n➡️ Desno — za desno roleto",
+      "tilt_info": "**Nova logika nagnjenosti:**\n0% = popolnoma zaprto (lamelice tesno skupaj)\n50% = polodprto\n100% = popolnoma odprto (lamelice na robu)",
+      "bg_image_hint": "Slika bo prikazana kot ozadje pod roletami, samo ko je kamera onemogočena.",
+      "no_feedback_hint": "Za naprave brez senzorja položaja",
+      "version": "v1.2.4 — Popravljeno: popolno ponovno ustvarjanje lamelic pri posodobitvi"
+    }
+  }
+}
