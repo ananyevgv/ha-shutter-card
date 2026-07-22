@@ -6,8 +6,7 @@
   "ui": {
     "card": {
       "title": "Shutter",
-      "subtitle": "Control",
-      "editor_title": "🪟 Shutter Card"
+      "subtitle": "Control"
     },
     "status": {
       "opening": "OPENING",
@@ -36,7 +35,9 @@
       "right": "Right",
       "no_feedback": "📡 No feedback",
       "memory": "💾",
-      "no_camera": "No camera"
+      "no_camera": "No camera",
+      "seconds": "sec",
+      "minutes": "min"
     },
     "greetings": {
       "night": "🌙 Good night",
@@ -54,10 +55,14 @@
     },
     "tilt": {
       "up": "Tilt up",
-      "down": "Tilt down",
-      "info_0": "0% = fully closed (slats tightly together)",
-      "info_50": "50% = half open",
-      "info_100": "100% = fully open (slats on edge)"
+      "down": "Tilt down"
+    },
+    "overlay": {
+      "live": "LIVE",
+      "motion_on": "🔴 Motion",
+      "motion_off": "⚪ Motion",
+      "recording_on": "REC",
+      "recording_off": "⏹ Recording"
     }
   },
   "editor": {
@@ -91,6 +96,7 @@
       "motion_entity": "Motion sensor",
       "recording_entity": "Recording status",
       "tilt_entity": "Tilt entity (optional)",
+      "tilt_entity_hint": "If not specified, uses the main entity",
       "tilt_visual": "Enable tilt visual",
       "tilt_visual_desc": "Disabled — slats always at 0% (fully closed)",
       "tilt_controls": "Show tilt buttons",
@@ -104,8 +110,11 @@
       "refresh_interval": "Refresh interval",
       "refresh_interval_desc": "How often to refresh camera frame (sec)",
       "show_timestamp": "Show timestamp",
+      "show_timestamp_desc": "Display current time on video",
       "show_motion": "Motion indicator",
+      "show_motion_desc": "Show motion sensor status",
       "show_recording": "Recording indicator",
+      "show_recording_desc": "Show recording status",
       "controls_position": "Controls position",
       "controls_bottom": "⬇️ Bottom",
       "controls_bottom_sub": "Horizontal",
@@ -155,11 +164,12 @@
       "reset": "↩ Reset colors"
     },
     "info": {
+      "overlay_hint": "Overlay settings",
       "dual_layout": "📌 In \"Dual\" mode, controls are positioned:\n⬅️ Left — for left shutter\n➡️ Right — for right shutter",
       "tilt_info": "**New tilt logic:**\n0% = fully closed (slats tightly together)\n50% = half open\n100% = fully open (slats on edge)",
       "bg_image_hint": "Image will be shown as background under the shutter, only when camera is disabled.",
       "no_feedback_hint": "For devices without position sensor",
-      "version": "v1.2.4 — Fixed: complete slat recreation on update"
+      "version": "v1.2.5 — Full localization"
     }
   }
 }
