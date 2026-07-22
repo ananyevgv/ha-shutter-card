@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Deutsch",
+    "flag": "de"
+  },
+  "ui": {
+    "card": {
+      "title": "Rollladen",
+      "subtitle": "Steuerung",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "ÖFFNET",
+      "closing": "SCHLIESST",
+      "stopped": "GESTOPPT",
+      "open": "OFFEN",
+      "closed": "GESCHLOSSEN",
+      "moving": "Bewegt...",
+      "partial": "GESTOPPT {position}%"
+    },
+    "buttons": {
+      "open": "Öffnen",
+      "stop": "Stop",
+      "close": "Schließen"
+    },
+    "labels": {
+      "position": "Position",
+      "camera": "Kamera",
+      "live": "LIVE",
+      "offline": "Offline",
+      "loading": "Laden...",
+      "motion": "Bewegung",
+      "recording": "Aufnahme",
+      "tilt": "Neigung",
+      "left": "Links",
+      "right": "Rechts",
+      "no_feedback": "📡 Kein Feedback",
+      "memory": "💾",
+      "no_camera": "Keine Kamera"
+    },
+    "greetings": {
+      "night": "🌙 Gute Nacht",
+      "morning": "🌅 Guten Morgen",
+      "afternoon": "☀️ Guten Tag",
+      "evening": "🌆 Guten Abend"
+    },
+    "dual": {
+      "left": "Links",
+      "right": "Rechts"
+    },
+    "feedback": {
+      "no_feedback": "📡 Kein Feedback",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Neigung auf",
+      "down": "Neigung ab",
+      "info_0": "0% = vollständig geschlossen (Lamellen dicht aneinander)",
+      "info_50": "50% = halb geöffnet",
+      "info_100": "100% = vollständig geöffnet (Lamellen auf Kante)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Sprache",
+      "title": "📝 Titel & Thema",
+      "entities": "🔌 Entitäten",
+      "tilt": "↕ Neigungssteuerung",
+      "camera": "📷 Kamera",
+      "overlay": "🎬 Überlagerung",
+      "display": "👁 Anzeige",
+      "colors": "🎨 Farben",
+      "background": "🌈 Hintergrund",
+      "advanced": "⚙️ Erweitert"
+    },
+    "fields": {
+      "title": "Kartentitel",
+      "subtitle": "Untertitel",
+      "owner_name": "Besitzername",
+      "theme": "Thema",
+      "theme_auto": "🌓 Auto (System)",
+      "theme_dark": "🌙 Dunkel",
+      "theme_light": "☀️ Hell",
+      "mode": "Modus",
+      "mode_single": "Einzel",
+      "mode_single_sub": "Ein Rollladen",
+      "mode_dual": "Dual",
+      "mode_dual_sub": "Links + Rechts",
+      "entity": "Rollladen-Entität",
+      "camera_entity": "Kamera-Entität",
+      "motion_entity": "Bewegungssensor",
+      "recording_entity": "Aufnahmestatus",
+      "tilt_entity": "Neigungs-Entität (optional)",
+      "tilt_visual": "Neigungsvisualisierung aktivieren",
+      "tilt_visual_desc": "Deaktiviert — Lamellen immer bei 0% (vollständig geschlossen)",
+      "tilt_controls": "Neigungsbuttons anzeigen",
+      "tilt_controls_desc": "↕ Buttons unter dem Rollladen (nur wenn Neigung aktiviert ist)",
+      "camera_size": "Kameragröße",
+      "camera_size_small": "Klein",
+      "camera_size_medium": "Mittel",
+      "camera_size_large": "Groß",
+      "camera_show": "Kamera anzeigen",
+      "camera_show_desc": "Kamera auf Karte anzeigen",
+      "refresh_interval": "Aktualisierungsintervall",
+      "refresh_interval_desc": "Wie oft Kamerabild aktualisieren (Sek)",
+      "show_timestamp": "Zeitstempel anzeigen",
+      "show_motion": "Bewegungsindikator",
+      "show_recording": "Aufnahmeindikator",
+      "controls_position": "Steuerungsposition",
+      "controls_bottom": "⬇️ Unten",
+      "controls_bottom_sub": "Horizontal",
+      "controls_top": "⬆️ Oben",
+      "controls_top_sub": "Horizontal",
+      "controls_left": "⬅️ Links",
+      "controls_left_sub": "Vertikal",
+      "controls_right": "➡️ Rechts",
+      "controls_right_sub": "Vertikal",
+      "show_greeting": "Begrüßung anzeigen",
+      "show_greeting_desc": "Tageszeit-Begrüßung anzeigen",
+      "show_position": "Position anzeigen",
+      "show_controls": "Steuerung anzeigen",
+      "show_status": "Status anzeigen",
+      "invert_position": "🔄 Position invertieren",
+      "invert_position_desc": "Positionswert invertieren (100% = geschlossen)",
+      "shutter_color": "Rollladenfarbe (RGBA)",
+      "shutter_color_left": "Rollladenfarbe (links)",
+      "shutter_color_right": "Rollladenfarbe (rechts)",
+      "opacity": "Deckkraft:",
+      "progress_bar": "Fortschrittsbalken anzeigen",
+      "progress_bar_desc": "Animierten Fortschrittsbalken unter Rollladen anzeigen",
+      "progress_style": "Fortschrittsbalken-Stil",
+      "progress_gradient": "🌈 Farbverlauf",
+      "progress_solid": "⬛ Einfarbig",
+      "no_feedback": "Feedback-freien Modus aktivieren",
+      "no_feedback_desc": "Für Geräte ohne Positionssensor",
+      "memory_type": "Speichermethode",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number für Positionsspeicherung",
+      "input_number_left": "Input number (links)",
+      "input_number_right": "Input number (rechts)",
+      "bg_image": "Hintergrundbild-URL",
+      "bg_image_desc": "Als Hintergrund unter Rollladen angezeigt, nur wenn Kamera aus ist",
+      "bg_preset": "Farbverlauf-Voreinstellung",
+      "bg_alpha": "Deckkraft",
+      "bg_blur": "Unschärfe",
+      "bg_custom_color1": "Farbe 1",
+      "bg_custom_color2": "Farbe 2"
+    },
+    "colors": {
+      "accent": "Akzentfarbe",
+      "text": "Textfarbe",
+      "open": "Offen-Farbe",
+      "closed": "Geschlossen-Farbe",
+      "reset": "↩ Farben zurücksetzen"
+    },
+    "info": {
+      "dual_layout": "📌 Im \"Dual\"-Modus sind die Steuerungen positioniert:\n⬅️ Links — für linken Rollladen\n➡️ Rechts — für rechten Rollladen",
+      "tilt_info": "**Neue Neigungslogik:**\n0% = vollständig geschlossen (Lamellen dicht aneinander)\n50% = halb geöffnet\n100% = vollständig geöffnet (Lamellen auf Kante)",
+      "bg_image_hint": "Bild wird als Hintergrund unter Rollladen angezeigt, nur wenn Kamera deaktiviert ist.",
+      "no_feedback_hint": "Für Geräte ohne Positionssensor",
+      "version": "v1.2.4 — Behoben: vollständige Neuerstellung der Lamellen bei Aktualisierung"
+    }
+  }
+}
