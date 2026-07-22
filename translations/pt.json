@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Português",
+    "flag": "pt"
+  },
+  "ui": {
+    "card": {
+      "title": "Estores",
+      "subtitle": "Controlo",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "ABERTURA",
+      "closing": "FECHO",
+      "stopped": "PARADO",
+      "open": "ABERTO",
+      "closed": "FECHADO",
+      "moving": "Em movimento...",
+      "partial": "PARADO {position}%"
+    },
+    "buttons": {
+      "open": "Abrir",
+      "stop": "Parar",
+      "close": "Fechar"
+    },
+    "labels": {
+      "position": "Posição",
+      "camera": "Câmara",
+      "live": "AO VIVO",
+      "offline": "Offline",
+      "loading": "A carregar...",
+      "motion": "Movimento",
+      "recording": "Gravação",
+      "tilt": "Inclinação",
+      "left": "Esquerda",
+      "right": "Direita",
+      "no_feedback": "📡 Sem feedback",
+      "memory": "💾",
+      "no_camera": "Sem câmara"
+    },
+    "greetings": {
+      "night": "🌙 Boa noite",
+      "morning": "🌅 Bom dia",
+      "afternoon": "☀️ Boa tarde",
+      "evening": "🌆 Boa noite"
+    },
+    "dual": {
+      "left": "Esquerda",
+      "right": "Direita"
+    },
+    "feedback": {
+      "no_feedback": "📡 Sem feedback",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Inclinar para cima",
+      "down": "Inclinar para baixo",
+      "info_0": "0% = completamente fechado (lâminas justas)",
+      "info_50": "50% = meio aberto",
+      "info_100": "100% = completamente aberto (lâminas na borda)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Idioma",
+      "title": "📝 Título e tema",
+      "entities": "🔌 Entidades",
+      "tilt": "↕ Controlo de inclinação",
+      "camera": "📷 Câmara",
+      "overlay": "🎬 Sobreposição",
+      "display": "👁 Exibição",
+      "colors": "🎨 Cores",
+      "background": "🌈 Fundo",
+      "advanced": "⚙️ Avançado"
+    },
+    "fields": {
+      "title": "Título do cartão",
+      "subtitle": "Subtítulo",
+      "owner_name": "Nome do proprietário",
+      "theme": "Tema",
+      "theme_auto": "🌓 Auto (sistema)",
+      "theme_dark": "🌙 Escuro",
+      "theme_light": "☀️ Claro",
+      "mode": "Modo",
+      "mode_single": "Único",
+      "mode_single_sub": "Um estore",
+      "mode_dual": "Dual",
+      "mode_dual_sub": "Esquerda + Direita",
+      "entity": "Entidade do estore",
+      "camera_entity": "Entidade da câmara",
+      "motion_entity": "Sensor de movimento",
+      "recording_entity": "Estado de gravação",
+      "tilt_entity": "Entidade de inclinação (opcional)",
+      "tilt_visual": "Ativar visualização de inclinação",
+      "tilt_visual_desc": "Desativado — lâminas sempre a 0% (completamente fechadas)",
+      "tilt_controls": "Mostrar botões de inclinação",
+      "tilt_controls_desc": "Botões ↕ sob o estore (apenas se a inclinação estiver ativada)",
+      "camera_size": "Tamanho da câmara",
+      "camera_size_small": "Pequena",
+      "camera_size_medium": "Média",
+      "camera_size_large": "Grande",
+      "camera_show": "Mostrar câmara",
+      "camera_show_desc": "Mostrar câmara no cartão",
+      "refresh_interval": "Intervalo de atualização",
+      "refresh_interval_desc": "Frequência de atualização da câmara (seg)",
+      "show_timestamp": "Mostrar timestamp",
+      "show_motion": "Indicador de movimento",
+      "show_recording": "Indicador de gravação",
+      "controls_position": "Posição dos controlos",
+      "controls_bottom": "⬇️ Em baixo",
+      "controls_bottom_sub": "Horizontal",
+      "controls_top": "⬆️ Em cima",
+      "controls_top_sub": "Horizontal",
+      "controls_left": "⬅️ À esquerda",
+      "controls_left_sub": "Vertical",
+      "controls_right": "➡️ À direita",
+      "controls_right_sub": "Vertical",
+      "show_greeting": "Mostrar saudação",
+      "show_greeting_desc": "Mostrar saudação conforme a hora",
+      "show_position": "Mostrar posição",
+      "show_controls": "Mostrar controlos",
+      "show_status": "Mostrar status",
+      "invert_position": "🔄 Inverter posição",
+      "invert_position_desc": "Inverter valor da posição (100% = fechado)",
+      "shutter_color": "Cor do estore (RGBA)",
+      "shutter_color_left": "Cor do estore (esquerda)",
+      "shutter_color_right": "Cor do estore (direita)",
+      "opacity": "Opacidade:",
+      "progress_bar": "Mostrar barra de progresso",
+      "progress_bar_desc": "Mostrar barra de progresso animada sob o estore",
+      "progress_style": "Estilo da barra de progresso",
+      "progress_gradient": "🌈 Gradiente",
+      "progress_solid": "⬛ Sólido",
+      "no_feedback": "Ativar modo sem feedback",
+      "no_feedback_desc": "Para dispositivos sem sensor de posição",
+      "memory_type": "Método de armazenamento",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number para armazenamento de posição",
+      "input_number_left": "Input number (esquerda)",
+      "input_number_right": "Input number (direita)",
+      "bg_image": "URL da imagem de fundo",
+      "bg_image_desc": "Mostrada como fundo sob o estore, apenas quando a câmara está desligada",
+      "bg_preset": "Predefinição de gradiente",
+      "bg_alpha": "Opacidade",
+      "bg_blur": "Desfoque",
+      "bg_custom_color1": "Cor 1",
+      "bg_custom_color2": "Cor 2"
+    },
+    "colors": {
+      "accent": "Cor de destaque",
+      "text": "Cor do texto",
+      "open": "Cor aberto",
+      "closed": "Cor fechado",
+      "reset": "↩ Repor cores"
+    },
+    "info": {
+      "dual_layout": "📌 No modo \"Dual\", os controlos estão posicionados:\n⬅️ Esquerda — para estore esquerdo\n➡️ Direita — para estore direito",
+      "tilt_info": "**Nova lógica de inclinação:**\n0% = completamente fechado (lâminas justas)\n50% = meio aberto\n100% = completamente aberto (lâminas na borda)",
+      "bg_image_hint": "A imagem será mostrada como fundo sob o estore, apenas quando a câmara estiver desativada.",
+      "no_feedback_hint": "Para dispositivos sem sensor de posição",
+      "version": "v1.2.4 — Corrigido: recriação completa das lâminas na atualização"
+    }
+  }
+}
