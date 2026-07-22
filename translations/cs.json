@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Čeština",
+    "flag": "cz"
+  },
+  "ui": {
+    "card": {
+      "title": "Rolety",
+      "subtitle": "Ovládání",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "OTEVÍRÁNÍ",
+      "closing": "ZAVÍRÁNÍ",
+      "stopped": "ZASTAVENO",
+      "open": "OTEVŘENO",
+      "closed": "ZAVŘENO",
+      "moving": "Pohybuje se...",
+      "partial": "ZASTAVENO {position}%"
+    },
+    "buttons": {
+      "open": "Otevřít",
+      "stop": "Zastavit",
+      "close": "Zavřít"
+    },
+    "labels": {
+      "position": "Poloha",
+      "camera": "Kamera",
+      "live": "ŽIVĚ",
+      "offline": "Offline",
+      "loading": "Načítání...",
+      "motion": "Pohyb",
+      "recording": "Záznam",
+      "tilt": "Náklon",
+      "left": "Levá",
+      "right": "Pravá",
+      "no_feedback": "📡 Bez zpětné vazby",
+      "memory": "💾",
+      "no_camera": "Žádná kamera"
+    },
+    "greetings": {
+      "night": "🌙 Dobrou noc",
+      "morning": "🌅 Dobré ráno",
+      "afternoon": "☀️ Dobrý den",
+      "evening": "🌆 Dobrý večer"
+    },
+    "dual": {
+      "left": "Levá",
+      "right": "Pravá"
+    },
+    "feedback": {
+      "no_feedback": "📡 Bez zpětné vazby",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Náklon nahoru",
+      "down": "Náklon dolů",
+      "info_0": "0% = zcela zavřeno (lamely těsně u sebe)",
+      "info_50": "50% = napůl otevřeno",
+      "info_100": "100% = zcela otevřeno (lamely na hraně)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Jazyk",
+      "title": "📝 Název a motiv",
+      "entities": "🔌 Entity",
+      "tilt": "↕ Ovládání náklonu",
+      "camera": "📷 Kamera",
+      "overlay": "🎬 Překrytí",
+      "display": "👁 Zobrazení",
+      "colors": "🎨 Barvy",
+      "background": "🌈 Pozadí",
+      "advanced": "⚙️ Pokročilé"
+    },
+    "fields": {
+      "title": "Název karty",
+      "subtitle": "Podtitul",
+      "owner_name": "Jméno vlastníka",
+      "theme": "Motiv",
+      "theme_auto": "🌓 Auto (systém)",
+      "theme_dark": "🌙 Tmavý",
+      "theme_light": "☀️ Světlý",
+      "mode": "Režim",
+      "mode_single": "Jeden",
+      "mode_single_sub": "Jedny rolety",
+      "mode_dual": "Dva",
+      "mode_dual_sub": "Levá + Pravá",
+      "entity": "Entita rolet",
+      "camera_entity": "Entita kamery",
+      "motion_entity": "Pohybové čidlo",
+      "recording_entity": "Stav záznamu",
+      "tilt_entity": "Entita náklonu (volitelně)",
+      "tilt_visual": "Povolit vizualizaci náklonu",
+      "tilt_visual_desc": "Vypnuto — lamely vždy na 0% (zcela zavřeno)",
+      "tilt_controls": "Zobrazit tlačítka náklonu",
+      "tilt_controls_desc": "Tlačítka ↕ pod roletami (pouze pokud je náklon povolen)",
+      "camera_size": "Velikost kamery",
+      "camera_size_small": "Malá",
+      "camera_size_medium": "Střední",
+      "camera_size_large": "Velká",
+      "camera_show": "Zobrazit kameru",
+      "camera_show_desc": "Zobrazit kameru na kartě",
+      "refresh_interval": "Interval obnovy",
+      "refresh_interval_desc": "Jak často obnovovat snímek kamery (sek)",
+      "show_timestamp": "Zobrazit časové razítko",
+      "show_motion": "Indikátor pohybu",
+      "show_recording": "Indikátor záznamu",
+      "controls_position": "Poloha ovládání",
+      "controls_bottom": "⬇️ Dole",
+      "controls_bottom_sub": "Horizontální",
+      "controls_top": "⬆️ Nahoře",
+      "controls_top_sub": "Horizontální",
+      "controls_left": "⬅️ Vlevo",
+      "controls_left_sub": "Vertikální",
+      "controls_right": "➡️ Vpravo",
+      "controls_right_sub": "Vertikální",
+      "show_greeting": "Zobrazit pozdrav",
+      "show_greeting_desc": "Zobrazit pozdrav podle denní doby",
+      "show_position": "Zobrazit polohu",
+      "show_controls": "Zobrazit ovládání",
+      "show_status": "Zobrazit stav",
+      "invert_position": "🔄 Invertovat polohu",
+      "invert_position_desc": "Invertovat hodnotu polohy (100% = zavřeno)",
+      "shutter_color": "Barva rolet (RGBA)",
+      "shutter_color_left": "Barva rolet (levá)",
+      "shutter_color_right": "Barva rolet (pravá)",
+      "opacity": "Průhlednost:",
+      "progress_bar": "Zobrazit ukazatel průběhu",
+      "progress_bar_desc": "Zobrazit animovaný ukazatel průběhu pod roletami",
+      "progress_style": "Styl ukazatele průběhu",
+      "progress_gradient": "🌈 Přechod",
+      "progress_solid": "⬛ Plný",
+      "no_feedback": "Povolit režim bez zpětné vazby",
+      "no_feedback_desc": "Pro zařízení bez snímače polohy",
+      "memory_type": "Způsob ukládání",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number pro ukládání polohy",
+      "input_number_left": "Input number (levá)",
+      "input_number_right": "Input number (pravá)",
+      "bg_image": "URL obrázku na pozadí",
+      "bg_image_desc": "Zobrazeno jako pozadí pod roletami, pouze když je kamera vypnuta",
+      "bg_preset": "Předvolba přechodu",
+      "bg_alpha": "Průhlednost",
+      "bg_blur": "Rozmazání",
+      "bg_custom_color1": "Barva 1",
+      "bg_custom_color2": "Barva 2"
+    },
+    "colors": {
+      "accent": "Zvýrazňující barva",
+      "text": "Barva textu",
+      "open": "Barva otevřeno",
+      "closed": "Barva zavřeno",
+      "reset": "↩ Obnovit barvy"
+    },
+    "info": {
+      "dual_layout": "📌 V režimu \"Dva\" jsou ovládací prvky umístěny:\n⬅️ Vlevo — pro levé rolety\n➡️ Vpravo — pro pravé rolety",
+      "tilt_info": "**Nová logika náklonu:**\n0% = zcela zavřeno (lamely těsně u sebe)\n50% = napůl otevřeno\n100% = zcela otevřeno (lamely na hraně)",
+      "bg_image_hint": "Obrázek bude zobrazen jako pozadí pod roletami, pouze když je kamera vypnuta.",
+      "no_feedback_hint": "Pro zařízení bez snímače polohy",
+      "version": "v1.2.4 — Opraveno: úplné znovuvytvoření lamel při aktualizaci"
+    }
+  }
+}
