@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Polski",
+    "flag": "pl"
+  },
+  "ui": {
+    "card": {
+      "title": "Rolety",
+      "subtitle": "Sterowanie",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "OTWIERANIE",
+      "closing": "ZAMYKANIE",
+      "stopped": "ZATRZYMANE",
+      "open": "OTWARTE",
+      "closed": "ZAMKNIĘTE",
+      "moving": "W ruchu...",
+      "partial": "ZATRZYMANE {position}%"
+    },
+    "buttons": {
+      "open": "Otwórz",
+      "stop": "Stop",
+      "close": "Zamknij"
+    },
+    "labels": {
+      "position": "Pozycja",
+      "camera": "Kamera",
+      "live": "NA ŻYWO",
+      "offline": "Offline",
+      "loading": "Ładowanie...",
+      "motion": "Ruch",
+      "recording": "Nagrywanie",
+      "tilt": "Nachylenie",
+      "left": "Lewa",
+      "right": "Prawa",
+      "no_feedback": "📡 Brak sprzężenia",
+      "memory": "💾",
+      "no_camera": "Brak kamery"
+    },
+    "greetings": {
+      "night": "🌙 Dobranoc",
+      "morning": "🌅 Dzień dobry",
+      "afternoon": "☀️ Dzień dobry",
+      "evening": "🌆 Dobry wieczór"
+    },
+    "dual": {
+      "left": "Lewa",
+      "right": "Prawa"
+    },
+    "feedback": {
+      "no_feedback": "📡 Brak sprzężenia",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Nachyl w górę",
+      "down": "Nachyl w dół",
+      "info_0": "0% = całkowicie zamknięte (lamelle ściśle przylegają)",
+      "info_50": "50% = półotwarte",
+      "info_100": "100% = całkowicie otwarte (lamelle na krawędzi)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Język",
+      "title": "📝 Tytuł i motyw",
+      "entities": "🔌 Encje",
+      "tilt": "↕ Sterowanie nachyleniem",
+      "camera": "📷 Kamera",
+      "overlay": "🎬 Nakładka",
+      "display": "👁 Wyświetlanie",
+      "colors": "🎨 Kolory",
+      "background": "🌈 Tło",
+      "advanced": "⚙️ Zaawansowane"
+    },
+    "fields": {
+      "title": "Tytuł karty",
+      "subtitle": "Podtytuł",
+      "owner_name": "Nazwa właściciela",
+      "theme": "Motyw",
+      "theme_auto": "🌓 Auto (system)",
+      "theme_dark": "🌙 Ciemny",
+      "theme_light": "☀️ Jasny",
+      "mode": "Tryb",
+      "mode_single": "Pojedynczy",
+      "mode_single_sub": "Jedna roleta",
+      "mode_dual": "Podwójny",
+      "mode_dual_sub": "Lewa + Prawa",
+      "entity": "Encja rolet",
+      "camera_entity": "Encja kamery",
+      "motion_entity": "Czujnik ruchu",
+      "recording_entity": "Status nagrywania",
+      "tilt_entity": "Encja nachylenia (opcjonalnie)",
+      "tilt_visual": "Włącz wizualizację nachylenia",
+      "tilt_visual_desc": "Wyłączone — lamelle zawsze na 0% (całkowicie zamknięte)",
+      "tilt_controls": "Pokaż przyciski nachylenia",
+      "tilt_controls_desc": "Przyciski ↕ pod roletą (tylko gdy nachylenie jest włączone)",
+      "camera_size": "Rozmiar kamery",
+      "camera_size_small": "Mały",
+      "camera_size_medium": "Średni",
+      "camera_size_large": "Duży",
+      "camera_show": "Pokaż kamerę",
+      "camera_show_desc": "Wyświetl kamerę na karcie",
+      "refresh_interval": "Interwał odświeżania",
+      "refresh_interval_desc": "Jak często odświeżać obraz kamery (sek)",
+      "show_timestamp": "Pokaż znacznik czasu",
+      "show_motion": "Wskaźnik ruchu",
+      "show_recording": "Wskaźnik nagrywania",
+      "controls_position": "Pozycja przycisków",
+      "controls_bottom": "⬇️ Na dole",
+      "controls_bottom_sub": "Poziomo",
+      "controls_top": "⬆️ Na górze",
+      "controls_top_sub": "Poziomo",
+      "controls_left": "⬅️ Po lewej",
+      "controls_left_sub": "Pionowo",
+      "controls_right": "➡️ Po prawej",
+      "controls_right_sub": "Pionowo",
+      "show_greeting": "Pokaż powitanie",
+      "show_greeting_desc": "Pokaż powitanie o porze dnia",
+      "show_position": "Pokaż pozycję",
+      "show_controls": "Pokaż sterowanie",
+      "show_status": "Pokaż status",
+      "invert_position": "🔄 Odwróć pozycję",
+      "invert_position_desc": "Odwróć wartość pozycji (100% = zamknięte)",
+      "shutter_color": "Kolor rolety (RGBA)",
+      "shutter_color_left": "Kolor rolety (lewa)",
+      "shutter_color_right": "Kolor rolety (prawa)",
+      "opacity": "Przezroczystość:",
+      "progress_bar": "Pokaż pasek postępu",
+      "progress_bar_desc": "Wyświetl animowany pasek postępu pod roletą",
+      "progress_style": "Styl paska postępu",
+      "progress_gradient": "🌈 Gradient",
+      "progress_solid": "⬛ Jednolity",
+      "no_feedback": "Włącz tryb bez sprzężenia",
+      "no_feedback_desc": "Dla urządzeń bez czujnika pozycji",
+      "memory_type": "Metoda przechowywania",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number do przechowywania pozycji",
+      "input_number_left": "Input number (lewa)",
+      "input_number_right": "Input number (prawa)",
+      "bg_image": "URL obrazu tła",
+      "bg_image_desc": "Wyświetlany jako tło pod roletą, tylko gdy kamera jest wyłączona",
+      "bg_preset": "Preset gradientu",
+      "bg_alpha": "Przezroczystość",
+      "bg_blur": "Rozmycie",
+      "bg_custom_color1": "Kolor 1",
+      "bg_custom_color2": "Kolor 2"
+    },
+    "colors": {
+      "accent": "Kolor akcentu",
+      "text": "Kolor tekstu",
+      "open": "Kolor otwarte",
+      "closed": "Kolor zamknięte",
+      "reset": "↩ Przywróć kolory"
+    },
+    "info": {
+      "dual_layout": "📌 W trybie \"Podwójny\" przyciski są rozmieszczone:\n⬅️ Lewa — dla lewej rolety\n➡️ Prawa — dla prawej rolety",
+      "tilt_info": "**Nowa logika nachylenia:**\n0% = całkowicie zamknięte (lamelle ściśle przylegają)\n50% = półotwarte\n100% = całkowicie otwarte (lamelle na krawędzi)",
+      "bg_image_hint": "Obraz będzie wyświetlany jako tło pod roletą, tylko gdy kamera jest wyłączona.",
+      "no_feedback_hint": "Dla urządzeń bez czujnika pozycji",
+      "version": "v1.2.4 — Poprawiono: całkowite odtworzenie lamelli przy aktualizacji"
+    }
+  }
+}
