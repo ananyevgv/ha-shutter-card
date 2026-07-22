@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Italiano",
+    "flag": "it"
+  },
+  "ui": {
+    "card": {
+      "title": "Tapparelle",
+      "subtitle": "Controllo",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "APERTURA",
+      "closing": "CHIUSURA",
+      "stopped": "FERMATO",
+      "open": "APERTO",
+      "closed": "CHIUSO",
+      "moving": "In movimento...",
+      "partial": "FERMATO {position}%"
+    },
+    "buttons": {
+      "open": "Apri",
+      "stop": "Ferma",
+      "close": "Chiudi"
+    },
+    "labels": {
+      "position": "Posizione",
+      "camera": "Telecamera",
+      "live": "LIVE",
+      "offline": "Offline",
+      "loading": "Caricamento...",
+      "motion": "Movimento",
+      "recording": "Registrazione",
+      "tilt": "Inclinazione",
+      "left": "Sinistra",
+      "right": "Destra",
+      "no_feedback": "📡 Senza feedback",
+      "memory": "💾",
+      "no_camera": "Nessuna telecamera"
+    },
+    "greetings": {
+      "night": "🌙 Buonanotte",
+      "morning": "🌅 Buongiorno",
+      "afternoon": "☀️ Buon pomeriggio",
+      "evening": "🌆 Buonasera"
+    },
+    "dual": {
+      "left": "Sinistra",
+      "right": "Destra"
+    },
+    "feedback": {
+      "no_feedback": "📡 Senza feedback",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Inclina verso l'alto",
+      "down": "Inclina verso il basso",
+      "info_0": "0% = completamente chiuso (lamelle serrate)",
+      "info_50": "50% = mezzo aperto",
+      "info_100": "100% = completamente aperto (lamelle sul bordo)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Lingua",
+      "title": "📝 Titolo e tema",
+      "entities": "🔌 Entità",
+      "tilt": "↕ Controllo inclinazione",
+      "camera": "📷 Telecamera",
+      "overlay": "🎬 Sovrapposizione",
+      "display": "👁 Visualizzazione",
+      "colors": "🎨 Colori",
+      "background": "🌈 Sfondo",
+      "advanced": "⚙️ Avanzate"
+    },
+    "fields": {
+      "title": "Titolo della scheda",
+      "subtitle": "Sottotitolo",
+      "owner_name": "Nome del proprietario",
+      "theme": "Tema",
+      "theme_auto": "🌓 Auto (sistema)",
+      "theme_dark": "🌙 Scuro",
+      "theme_light": "☀️ Chiaro",
+      "mode": "Modalità",
+      "mode_single": "Singola",
+      "mode_single_sub": "Una tapparella",
+      "mode_dual": "Doppia",
+      "mode_dual_sub": "Sinistra + Destra",
+      "entity": "Entità tapparella",
+      "camera_entity": "Entità telecamera",
+      "motion_entity": "Sensore di movimento",
+      "recording_entity": "Stato registrazione",
+      "tilt_entity": "Entità inclinazione (opzionale)",
+      "tilt_visual": "Abilita visualizzazione inclinazione",
+      "tilt_visual_desc": "Disabilitato — lamelle sempre a 0% (completamente chiuse)",
+      "tilt_controls": "Mostra pulsanti inclinazione",
+      "tilt_controls_desc": "Pulsanti ↕ sotto la tapparella (solo se l'inclinazione è abilitata)",
+      "camera_size": "Dimensione telecamera",
+      "camera_size_small": "Piccola",
+      "camera_size_medium": "Media",
+      "camera_size_large": "Grande",
+      "camera_show": "Mostra telecamera",
+      "camera_show_desc": "Mostra telecamera sulla scheda",
+      "refresh_interval": "Intervallo di aggiornamento",
+      "refresh_interval_desc": "Frequenza aggiornamento telecamera (sec)",
+      "show_timestamp": "Mostra timestamp",
+      "show_motion": "Indicatore di movimento",
+      "show_recording": "Indicatore di registrazione",
+      "controls_position": "Posizione controlli",
+      "controls_bottom": "⬇️ Sotto",
+      "controls_bottom_sub": "Orizzontale",
+      "controls_top": "⬆️ Sopra",
+      "controls_top_sub": "Orizzontale",
+      "controls_left": "⬅️ Sinistra",
+      "controls_left_sub": "Verticale",
+      "controls_right": "➡️ Destra",
+      "controls_right_sub": "Verticale",
+      "show_greeting": "Mostra saluto",
+      "show_greeting_desc": "Mostra saluto in base all'ora",
+      "show_position": "Mostra posizione",
+      "show_controls": "Mostra controlli",
+      "show_status": "Mostra stato",
+      "invert_position": "🔄 Inverti posizione",
+      "invert_position_desc": "Inverti valore posizione (100% = chiuso)",
+      "shutter_color": "Colore tapparella (RGBA)",
+      "shutter_color_left": "Colore tapparella (sinistra)",
+      "shutter_color_right": "Colore tapparella (destra)",
+      "opacity": "Opacità:",
+      "progress_bar": "Mostra barra di progresso",
+      "progress_bar_desc": "Mostra barra di progresso animata sotto la tapparella",
+      "progress_style": "Stile barra di progresso",
+      "progress_gradient": "🌈 Gradiente",
+      "progress_solid": "⬛ Solido",
+      "no_feedback": "Abilita modalità senza feedback",
+      "no_feedback_desc": "Per dispositivi senza sensore di posizione",
+      "memory_type": "Metodo di archiviazione",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number per archiviazione posizione",
+      "input_number_left": "Input number (sinistra)",
+      "input_number_right": "Input number (destra)",
+      "bg_image": "URL immagine sfondo",
+      "bg_image_desc": "Mostrata come sfondo sotto la tapparella, solo quando la telecamera è spenta",
+      "bg_preset": "Preset gradiente",
+      "bg_alpha": "Opacità",
+      "bg_blur": "Sfocatura",
+      "bg_custom_color1": "Colore 1",
+      "bg_custom_color2": "Colore 2"
+    },
+    "colors": {
+      "accent": "Colore accent",
+      "text": "Colore testo",
+      "open": "Colore aperto",
+      "closed": "Colore chiuso",
+      "reset": "↩ Ripristina colori"
+    },
+    "info": {
+      "dual_layout": "📌 In modalità \"Doppia\", i controlli sono posizionati:\n⬅️ Sinistra — per tapparella sinistra\n➡️ Destra — per tapparella destra",
+      "tilt_info": "**Nuova logica inclinazione:**\n0% = completamente chiuso (lamelle serrate)\n50% = mezzo aperto\n100% = completamente aperto (lamelle sul bordo)",
+      "bg_image_hint": "L'immagine sarà mostrata come sfondo sotto la tapparella, solo quando la telecamera è disabilitata.",
+      "no_feedback_hint": "Per dispositivi senza sensore di posizione",
+      "version": "v1.2.4 — Corretto: ricreazione completa delle lamelle all'aggiornamento"
+    }
+  }
+}
