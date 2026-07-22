@@ -1,0 +1,165 @@
+{
+  "language": {
+    "name": "Русский",
+    "flag": "ru"
+  },
+  "ui": {
+    "card": {
+      "title": "Жалюзи",
+      "subtitle": "Управление",
+      "editor_title": "🪟 Shutter Card"
+    },
+    "status": {
+      "opening": "ОТКРЫТИЕ",
+      "closing": "ЗАКРЫТИЕ",
+      "stopped": "ОСТАНОВЛЕНО",
+      "open": "ОТКРЫТО",
+      "closed": "ЗАКРЫТО",
+      "moving": "Движется...",
+      "partial": "ОСТАНОВЛЕНО {position}%"
+    },
+    "buttons": {
+      "open": "Открыть",
+      "stop": "Стоп",
+      "close": "Закрыть"
+    },
+    "labels": {
+      "position": "Позиция",
+      "camera": "Камера",
+      "live": "LIVE",
+      "offline": "Не в сети",
+      "loading": "Загрузка...",
+      "motion": "Движение",
+      "recording": "Запись",
+      "tilt": "Наклон",
+      "left": "Левая",
+      "right": "Правая",
+      "no_feedback": "📡 Без ОС",
+      "memory": "💾",
+      "no_camera": "Нет камеры"
+    },
+    "greetings": {
+      "night": "🌙 Доброй ночи",
+      "morning": "🌅 Доброе утро",
+      "afternoon": "☀️ Добрый день",
+      "evening": "🌆 Добрый вечер"
+    },
+    "dual": {
+      "left": "Левая",
+      "right": "Правая"
+    },
+    "feedback": {
+      "no_feedback": "📡 Без ОС",
+      "memory": "💾"
+    },
+    "tilt": {
+      "up": "Наклон вверх",
+      "down": "Наклон вниз",
+      "info_0": "0% = полностью закрыто (ламели плотно прилегают)",
+      "info_50": "50% = половина открыто",
+      "info_100": "100% = полностью открыто (ламели ребром)"
+    }
+  },
+  "editor": {
+    "sections": {
+      "language": "🌐 Язык",
+      "title": "📝 Название и тема",
+      "entities": "🔌 Сущности",
+      "tilt": "↕ Управление наклоном",
+      "camera": "📷 Камера",
+      "overlay": "🎬 Оверлей",
+      "display": "👁 Отображение",
+      "colors": "🎨 Цвета",
+      "background": "🌈 Фон",
+      "advanced": "⚙️ Расширенные"
+    },
+    "fields": {
+      "title": "Название карточки",
+      "subtitle": "Подзаголовок",
+      "owner_name": "Имя владельца",
+      "theme": "Тема",
+      "theme_auto": "🌓 Авто (системная)",
+      "theme_dark": "🌙 Тёмная",
+      "theme_light": "☀️ Светлая",
+      "mode": "Режим",
+      "mode_single": "Одно",
+      "mode_single_sub": "Одна шторка",
+      "mode_dual": "Два",
+      "mode_dual_sub": "Левая + Правая",
+      "entity": "Сущность жалюзи",
+      "camera_entity": "Сущность камеры",
+      "motion_entity": "Датчик движения",
+      "recording_entity": "Статус записи",
+      "tilt_entity": "Сущность наклона (опционально)",
+      "tilt_visual": "Включить наклон ламелей",
+      "tilt_visual_desc": "Выключено — ламели всегда в положении 0% (плотно закрыты)",
+      "tilt_controls": "Показать кнопки наклона",
+      "tilt_controls_desc": "Кнопки ↕ под шторкой (только если наклон включён)",
+      "camera_size": "Размер камеры",
+      "camera_size_small": "Маленькая",
+      "camera_size_medium": "Средняя",
+      "camera_size_large": "Большая",
+      "camera_show": "Показать камеру",
+      "camera_show_desc": "Отображать камеру на карточке",
+      "refresh_interval": "Интервал обновления",
+      "refresh_interval_desc": "Как часто обновлять кадр камеры (сек)",
+      "show_timestamp": "Показывать время",
+      "show_motion": "Индикатор движения",
+      "show_recording": "Индикатор записи",
+      "controls_position": "Расположение кнопок",
+      "controls_bottom": "⬇️ Снизу",
+      "controls_bottom_sub": "Горизонтально",
+      "controls_top": "⬆️ Сверху",
+      "controls_top_sub": "Горизонтально",
+      "controls_left": "⬅️ Слева",
+      "controls_left_sub": "Вертикально",
+      "controls_right": "➡️ Справа",
+      "controls_right_sub": "Вертикально",
+      "show_greeting": "Приветствие",
+      "show_greeting_desc": "Показать приветствие по времени суток",
+      "show_position": "Показать позицию",
+      "show_controls": "Показать управление",
+      "show_status": "Показать статус",
+      "invert_position": "🔄 Инвертировать позицию",
+      "invert_position_desc": "Инвертировать значение позиции (100% = закрыто)",
+      "shutter_color": "Цвет шторки (RGBA)",
+      "shutter_color_left": "Цвет шторки (левая)",
+      "shutter_color_right": "Цвет шторки (правая)",
+      "opacity": "Прозрачность:",
+      "progress_bar": "Показать шкалу прогресса",
+      "progress_bar_desc": "Отображать анимированную шкалу под шторкой",
+      "progress_style": "Стиль шкалы",
+      "progress_gradient": "🌈 Градиент",
+      "progress_solid": "⬛ Сплошной",
+      "no_feedback": "Включить режим без ОС",
+      "no_feedback_desc": "Для устройств без датчика положения",
+      "memory_type": "Способ хранения",
+      "memory_localstorage": "💾 localStorage",
+      "memory_input_number": "📝 input_number",
+      "input_number": "Input number для хранения позиции",
+      "input_number_left": "Input number (левая)",
+      "input_number_right": "Input number (правая)",
+      "bg_image": "URL фонового изображения",
+      "bg_image_desc": "Изображение будет показано как фон под шторкой, только когда камера выключена",
+      "bg_preset": "Пресет градиента",
+      "bg_alpha": "Прозрачность",
+      "bg_blur": "Размытие",
+      "bg_custom_color1": "Цвет 1",
+      "bg_custom_color2": "Цвет 2"
+    },
+    "colors": {
+      "accent": "Акцентный цвет",
+      "text": "Цвет текста",
+      "open": "Цвет открыто",
+      "closed": "Цвет закрыто",
+      "reset": "↩ Сбросить цвета"
+    },
+    "info": {
+      "dual_layout": "📌 В режиме \"Два\" кнопки управления расположены:\n⬅️ Слева — для левой шторки\n➡️ Справа — для правой шторки",
+      "tilt_info": "**Новая логика наклона:**\n0% = полностью закрыто (ламели плотно прилегают друг к другу)\n50% = половина открыто\n100% = полностью открыто (ламели повернуты ребром)",
+      "bg_image_hint": "Изображение будет показано как фон под шторкой, только когда камера выключена.",
+      "no_feedback_hint": "Для устройств без датчика положения",
+      "version": "v1.2.4 — Исправлено: полное пересоздание ламелей при обновлении"
+    }
+  }
+}
