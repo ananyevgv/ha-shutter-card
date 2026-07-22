@@ -154,11 +154,11 @@ input_number:
 
 **Шаг 1:** Добавьте пользовательский репозиторий в HACS:
 
-[![Открыть репозиторий в HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=yourusername&repository=ha-shutter-card&category=plugin)
+[![Открыть репозиторий в HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=NagibinA&repository=ha-shutter-card&category=plugin)
 
 > Если кнопка не работает, добавьте вручную:
 > **HACS → Панель → ⋮ → Пользовательские репозитории**
-> → URL: `https://github.com/yourusername/ha-shutter-card` → Тип: **Панель** → Добавить
+> → URL: `https://github.com/NagibinA/ha-shutter-card` → Тип: **Панель** → Добавить
 
 **Шаг 2:** Найдите **HA Shutter Card** → **Установить**
 
@@ -168,8 +168,8 @@ input_number:
 
 ### Способ 2 — Ручная установка
 
-1. Скачайте [`ha-shutter-card.js`](https://github.com/yourusername/ha-shutter-card/releases/latest)
-2. Скопируйте в `/config/www/ha-shutter-card.js`
+1. Скачайте [`ha-shutter-card.js`](https://github.com/NagibinA/ha-shutter-card/releases/latest)
+2. Скопируйте разархивированные файлы архива в `/config/www/ha-shutter-card`
 3. Перейдите в **Настройки → Панели → Ресурсы** → **Добавить ресурс**:
 
 | Параметр | Значение |
