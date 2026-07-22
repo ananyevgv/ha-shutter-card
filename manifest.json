@@ -1,9 +1,0 @@
-{
-    "domain": "ha-shutter-card",
-    "name": "HA Shutter Card",
-    "version": "1.2.4",
-    "documentation": "https://github.com/ananyevgv/ha-shutter-card/blob/main/README.md",
-    "issue_tracker": "https://github.com/ananyevgv/ha-shutter-card/issues",
-    "codeowners": ["@ananyevgv"],
-    "requirements": []
-}
