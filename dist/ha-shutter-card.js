@@ -2884,7 +2884,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.2.4 %c Исправлено полное пересоздание ламелей при обновлении!',
+  '%c 🪟 Shutter Card %c v1.2.5 %c Исправлено полное пересоздание ламелей при обновлении!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
