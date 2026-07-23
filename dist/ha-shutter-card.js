@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.2.4 — Исправлено: наклон ламелей как в документации HA
+// v1.2.5 — Исправлено: наклон ламелей как в документации HA
 
 import { SHUTTER_TRANSLATIONS } from './translations/index.js';
 
@@ -2867,7 +2867,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'shutter-card',
   name: '🪟 Shutter Card',
-  description: 'Управление жалюзи с 24 ламелями. Наклон: 0% = плотно прилегают, 100% = открыто',
+  description: 'Управление жалюзи с 24 ламелями. ',
   preview: true,
   editable: true,
   config: {
