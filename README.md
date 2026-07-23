@@ -143,6 +143,11 @@ input_number:
 
 ---
 
+
+![Редактор HA Shutter Card](images/preview5.png)
+
+---
+
 ## 🎯 Исправление v1.2.5
 ###  🔄 Теперь все элементы интерфейса полностью локализованы
 - Добавлены все недостающие ключи в файлы переводов
@@ -151,7 +156,7 @@ input_number:
 ---
 
 
-![Редактор HA Shutter Card](images/preview5.png)
+![Редактор HA Shutter Card](images/preview6.png)
 
 
 ---
