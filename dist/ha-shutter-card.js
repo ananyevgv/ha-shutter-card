@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.2.5 — Исправлено: наклон ламелей как в документации HA
+// v1.2.5 — Полная локализация интерфейса
 
 import { SHUTTER_TRANSLATIONS } from './i18n/index.js';
 
