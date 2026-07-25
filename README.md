@@ -1,7 +1,7 @@
 # HA Shutter Card
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-![version](https://img.shields.io/badge/version-1.2.5-blue)
+![version](https://img.shields.io/badge/version-1.3.0-blue)
 ![HA](https://img.shields.io/badge/Home%20Assistant-2023.1+-green)
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -160,6 +160,23 @@ input_number:
 
 
 ---
+
+## 🎯 Новые возможности v1.3.0
+
+### 🆕 Раздвижные шторы (Sliding)
+- Добавлена поддержка раздвижных штор в дополнение к классическим жалюзи
+- Возможность выбора типа штор в настройках: blind (жалюзи) или sliding (раздвижные)
+- Настройка направления раздвижки: от центра к краям, слева направо, справа налево
+
+---
+
+
+![Редактор HA Shutter Card](images/preview7.png)
+
+
+---
+
+
 
 ## 📦 Установка
 
