@@ -1,5 +1,5 @@
 // ha-shutter-card.js
-// v1.3.0 
+// v1.3.1 — Добавлена поддержка раздвижных штор (Sliding)
 
 import { SHUTTER_TRANSLATIONS } from './translations/index.js';
 
@@ -128,8 +128,9 @@ const SHUTTER_DEFAULT_CONFIG = {
   show_progress_bar: true,
   progress_bar_style: 'gradient',
   
-  shutter_type: 'blind',
-  sliding_direction: 'center',
+  // NEW: Shutter type
+  shutter_type: 'blind', // 'blind' | 'sliding'
+  sliding_direction: 'center', // 'center' | 'left' | 'right'
 };
 
 // ─── CSS ──────────────────────────────────────────────────────────────────
@@ -209,17 +210,45 @@ function getShutterCSS(haTheme) {
 
 /* ─── Sliding Shutter Styles ──────────────────────────────────────────── */
 .sliding-half {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  transition: width 0.5s ease, opacity 0.5s ease;
   pointer-events: none;
+  background: rgba(60, 60, 80, 0.9);
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
+  width: 0;
 }
+
 .sliding-half.left {
+  left: 0;
   border-radius: 0 8px 8px 0;
 }
+
 .sliding-half.right {
+  right: 0;
   border-radius: 8px 0 0 8px;
 }
-.sliding-fold {
+
+.sliding-half .sliding-fold {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(255,255,255,0.03);
+  border-right: 1px solid rgba(255,255,255,0.05);
+}
+.sliding-half .sliding-fold:nth-child(odd) {
+  background: rgba(255,255,255,0.05);
+}
+.sliding-half .sliding-fold::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.05) 100%);
   pointer-events: none;
 }
+
+.camera-shutters-overlay .shutter-divider{width:2px;background:rgba(255,255,255,0.15);flex-shrink:0;z-index:3;pointer-events:none}
 
 .tilt-controls{display:flex;gap:4px;justify-content:center;padding:2px 0;order:2}
 .tilt-controls .tilt-btn{flex:1;max-width:50px;padding:4px 6px;border-radius:8px;
@@ -281,6 +310,17 @@ function getShutterCSS(haTheme) {
 .controls .control-btn.stop:hover{border-color:#f59e0b;color:#f59e0b}
 .controls .control-btn.close:hover{border-color:var(--cv-closed,#ef4444);color:var(--cv-closed,#ef4444)}
 
+/* ─── Dual mode desktop ────────────────────────────────────────────────── */
+.shutter-controls-dual .controls-desktop {
+  display: contents;
+}
+.shutter-controls-dual .controls-desktop .controls-left {
+  order: 0;
+}
+.shutter-controls-dual .controls-desktop .controls-right {
+  order: 2;
+}
+
 .controls-left,.controls-right{display:flex;flex-direction:column;width:auto;min-width:45px;gap:4px;flex-shrink:0}
 .controls-left{order:0}
 .controls-right{order:2}
@@ -334,6 +374,7 @@ function getShutterCSS(haTheme) {
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.2}}
 @keyframes progressPulse{0%,100%{opacity:1}50%{opacity:0.6}}
 
+/* ─── Mobile ───────────────────────────────────────────────────────────── */
 @media(max-width:500px){
   .inner{padding:12px}
   .header-title{font-size:17px}
@@ -349,14 +390,8 @@ function getShutterCSS(haTheme) {
   .controls-left .control-btn .ico,.controls-right .control-btn .ico{font-size:18px !important;line-height:1.2 !important}
   .controls-left .control-btn span,.controls-right .control-btn span{display:block !important;font-size:7px !important}
 
-  /* Dual mode mobile layout - controls on top, camera below */
-  .shutter-controls-dual .shutter-row {
-    flex-direction: column !important;
-    flex-wrap: wrap !important;
-    align-items: stretch !important;
-    gap: 4px !important;
-  }
-  .shutter-controls-dual .controls-wrapper {
+  /* Dual mode mobile layout - controls in one row on top, camera below */
+  .shutter-controls-dual .controls-desktop {
     display: flex !important;
     flex-direction: row !important;
     width: 100% !important;
@@ -364,7 +399,7 @@ function getShutterCSS(haTheme) {
     order: 1 !important;
     flex: 0 0 auto !important;
   }
-  .shutter-controls-dual .controls-wrapper .controls-left {
+  .shutter-controls-dual .controls-desktop .controls-left {
     flex: 1 !important;
     justify-content: flex-start !important;
     flex-direction: row !important;
@@ -373,7 +408,7 @@ function getShutterCSS(haTheme) {
     gap: 2px !important;
     order: 0 !important;
   }
-  .shutter-controls-dual .controls-wrapper .controls-right {
+  .shutter-controls-dual .controls-desktop .controls-right {
     flex: 1 !important;
     justify-content: flex-end !important;
     flex-direction: row !important;
@@ -382,21 +417,21 @@ function getShutterCSS(haTheme) {
     gap: 2px !important;
     order: 0 !important;
   }
-  .shutter-controls-dual .controls-wrapper .controls-left .control-btn,
-  .shutter-controls-dual .controls-wrapper .controls-right .control-btn {
+  .shutter-controls-dual .controls-desktop .controls-left .control-btn,
+  .shutter-controls-dual .controls-desktop .controls-right .control-btn {
     flex: 0 1 auto !important;
     max-width: 50px !important;
     min-height: 32px !important;
     padding: 2px 4px !important;
     font-size: 7px !important;
   }
-  .shutter-controls-dual .controls-wrapper .controls-left .control-btn .ico,
-  .shutter-controls-dual .controls-wrapper .controls-right .control-btn .ico {
+  .shutter-controls-dual .controls-desktop .controls-left .control-btn .ico,
+  .shutter-controls-dual .controls-desktop .controls-right .control-btn .ico {
     font-size: 14px !important;
     line-height: 1.2 !important;
   }
-  .shutter-controls-dual .controls-wrapper .controls-left .control-btn span,
-  .shutter-controls-dual .controls-wrapper .controls-right .control-btn span {
+  .shutter-controls-dual .controls-desktop .controls-left .control-btn span,
+  .shutter-controls-dual .controls-desktop .controls-right .control-btn span {
     display: block !important;
     font-size: 6px !important;
   }
@@ -1611,7 +1646,7 @@ class ShutterCard extends HTMLElement {
             ${tiltControlsHtml}
 
             <div class="shutter-row">
-              ${isDual ? `<div class="controls-wrapper">${leftControlsHtml}${rightControlsHtml}</div>` : controlsLeftHtmlSingle}
+              ${isDual ? `<div class="controls-desktop">${leftControlsHtml}${rightControlsHtml}</div>` : controlsLeftHtmlSingle}
               ${cameraHtml}
               ${!isDual ? controlsRightHtmlSingle : ''}
             </div>
@@ -2085,7 +2120,6 @@ class ShutterCard extends HTMLElement {
   }
 }
 
-
 // ─── EDITOR ──────────────────────────────────────────────────────────────
 class ShutterCardEditor extends HTMLElement {
   constructor() {
@@ -2470,7 +2504,7 @@ class ShutterCardEditor extends HTMLElement {
 
       <div class="editor">
         <div class="credit">🪟 <strong>Shutter Card</strong>
-          <span style="color:var(--secondary-text-color);font-weight:400;">v1.3.0</span>
+          <span style="color:var(--secondary-text-color);font-weight:400;">v1.3.1</span>
         </div>
 
         <!-- Language -->
@@ -3210,7 +3244,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
   type: 'shutter-card',
   name: '🪟 Shutter Card',
-  description: 'Управление жалюзи и раздвижными шторами. v1.3.0',
+  description: 'Управление жалюзи и раздвижными шторами. v1.3.1',
   preview: true,
   editable: true,
   config: {
@@ -3229,7 +3263,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c 🪟 Shutter Card %c v1.3.3 %c Раздвижка в двойном режиме!',
+  '%c 🪟 Shutter Card %c v1.3.1 %c Раздвижка в двойном режиме!',
   'background:#0a1628;color:#00d4ff;font-weight:700;padding:2px 6px;border-radius:4px 0 0 4px;font-size:12px',
   'background:#00d4ff;color:#0a1628;font-weight:700;padding:2px 6px;border-radius:0 4px 4px 0;font-size:12px',
   'color:#4ade80;font-weight:400;font-size:11px;margin-left:4px'
